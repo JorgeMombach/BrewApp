@@ -1,0 +1,20 @@
+# LF no repositório e no disco, independente do core.autocrlf da máquina
+* text=auto eol=lf
+
+# Scripts do Windows precisam de CRLF (ex.: mvnw.cmd)
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binários
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.webp binary
+*.pdf binary
+*.jar binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
