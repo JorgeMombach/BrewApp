@@ -1,0 +1,131 @@
+{
+  "realm": "brewapp",
+  "displayName": "BrewApp",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "verifyEmail": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "passwordPolicy": "length(12) and specialChars(1) and notUsername",
+  "internationalizationEnabled": true,
+  "supportedLocales": ["pt-BR", "es", "en"],
+  "defaultLocale": "pt-BR",
+  "clients": [
+    {
+      "clientId": "brewapp-web",
+      "name": "BrewApp Web",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:5173/auth/callback"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-brewapp-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "brewapp-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "brewapp-desktop",
+      "name": "BrewApp Desktop",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:1420/auth/callback"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://127.0.0.1:1420/"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-brewapp-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "brewapp-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "brewapp-mobile",
+      "name": "BrewApp Mobile",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["brewapp://auth/callback"],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "brewapp://auth/logout"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-brewapp-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "brewapp-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "${BREWAPP_TEST_USER_USERNAME}",
+      "email": "${BREWAPP_TEST_USER_USERNAME}@brewapp.local",
+      "emailVerified": true,
+      "firstName": "Usuário",
+      "lastName": "de Teste",
+      "enabled": true,
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BREWAPP_TEST_USER_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

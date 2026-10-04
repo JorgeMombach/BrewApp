@@ -1,0 +1,65 @@
+# Infraestrutura local do BrewApp. Rodar a partir de infra/: docker compose up -d
+# As variáveis vêm do .env da raiz do repositório (copiado de .env.example), via env_file.
+# Portas publicadas ficam fixas aqui: o Compose só interpola variáveis do .env da própria pasta.
+name: brewapp
+
+services:
+  postgres:
+    image: postgres:18.6
+    # pg_stat_statements precisa ser carregada na subida do servidor (spec 5.6)
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
+    env_file:
+      - path: ../.env
+        required: true
+    ports:
+      # 5433 no host para não conflitar com um Postgres instalado localmente
+      - "127.0.0.1:5433:5432"
+    volumes:
+      # A partir do Postgres 18 o volume é montado em /var/lib/postgresql (não mais em .../data)
+      - postgres-data:/var/lib/postgresql
+      # Roda só na primeira subida, com o volume vazio
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    # Importa o realm versionado na subida; se o realm já existir, o import é ignorado (resetar para reaplicar)
+    command: ["start-dev", "--import-realm"]
+    env_file:
+      - path: ../.env
+        required: true
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      # Emissor dos tokens; precisa bater com BREWAPP_OAUTH_ISSUER_URI
+      KC_HOSTNAME: http://localhost:8180
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # A imagem não tem curl/wget: consulta o endpoint de saúde (porta de management 9000) via /dev/tcp
+      test:
+        - CMD
+        - bash
+        - -c
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          head -n 1 <&3 | grep -q ' 200 '
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+volumes:
+  postgres-data:

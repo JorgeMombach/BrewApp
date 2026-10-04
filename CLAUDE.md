@@ -71,7 +71,7 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 | Mobile e offline | BREW-10 |
 | Comparação de lotes | BREW-11 |
 
-Histórias: BREW-12 a BREW-66 (55 histórias, 229 pontos). Criar ou alterar issues somente com aprovação explícita do usuário.
+Histórias: BREW-12 a BREW-67 (56 histórias; 229 pontos estimados, BREW-67 ainda sem estimativa). Criar ou alterar issues somente com aprovação explícita do usuário.
 
 ## Git
 
