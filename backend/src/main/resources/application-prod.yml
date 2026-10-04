@@ -1,0 +1,10 @@
+# Produção: nenhum valor sensível aqui, tudo vem de variáveis de ambiente (application.yml)
+spring:
+  main:
+    banner-mode: off
+
+management:
+  endpoint:
+    health:
+      # Rota pública: não expõe detalhes dos componentes
+      show-details: never

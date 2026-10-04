@@ -102,13 +102,47 @@ Todos os erros seguem o formato **Problem Details (RFC 9457)**, estendido com um
 | 401 | Token ausente, inválido ou expirado |
 | 403 | Usuário autenticado sem a permissão necessária, ou sem vínculo com a organização do cabeçalho |
 | 404 | Recurso não existe **ou pertence a outra organização** |
+| 405 | Método HTTP não suportado na rota (a resposta traz o cabeçalho `Allow`) |
+| 406 | O `Accept` pedido não pode ser atendido |
 | 409 | Conflito com o estado atual (ex.: nome duplicado, lote em estado que não aceita a operação) |
 | 412 | `If-Match` não corresponde à versão atual do recurso |
+| 415 | `Content-Type` não suportado |
 | 422 | Corpo bem formado, mas viola uma regra de domínio |
 | 428 | Alteração de recurso mutável sem `If-Match` |
 | 429 | Limite de requisições excedido |
+| 500 | Erro inesperado no servidor (o detalhe fica só no log) |
 
 **Recurso de outra organização responde 404, não 403.** Responder 403 confirmaria que o recurso existe, e isso já é vazamento de informação.
+
+**Códigos genéricos.** Valem para qualquer endpoint e não dependem do domínio. Os códigos de negócio (como `LOTE_ENVASADO`) são documentados junto de cada endpoint.
+
+| `code` | Status | Quando |
+|---|---|---|
+| `VALIDACAO_FALHOU` | 400 | Um ou mais campos ou parâmetros violam as regras de formato; o detalhe de cada um vem em `errors` |
+| `CORPO_MALFORMADO` | 400 | O corpo não é um JSON válido ou não pode ser lido |
+| `REQUISICAO_INVALIDA` | 400 | Outros problemas da requisição, como parâmetro obrigatório ausente ou valor de tipo errado na URL |
+| `NAO_AUTENTICADO` | 401 | Token ausente, inválido ou expirado |
+| `ACESSO_NEGADO` | 403 | Falta a permissão necessária |
+| `ROTA_NAO_ENCONTRADA` | 404 | A rota não existe (diferente de um recurso não encontrado, que tem código próprio) |
+| `METODO_NAO_SUPORTADO` | 405 | Método HTTP não suportado na rota |
+| `TIPO_DE_RESPOSTA_NAO_SUPORTADO` | 406 | O `Accept` pedido não pode ser atendido |
+| `TIPO_DE_CONTEUDO_NAO_SUPORTADO` | 415 | `Content-Type` não suportado |
+| `ERRO_INTERNO` | 500 | Erro inesperado no servidor |
+
+**Códigos dos erros de validação** (o `code` de cada item de `errors`). Os parâmetros da regra vêm em `params`, com o nome usado na regra: o limite de um `ACIMA_DO_MAXIMO` chega como `{ "value": 200 }`, e o de um `TAMANHO_INVALIDO` como `{ "min": 1, "max": 100 }`.
+
+| `code` | Quando |
+|---|---|
+| `OBRIGATORIO` | Campo ausente, nulo ou em branco |
+| `DEVE_SER_POSITIVO` | Valor precisa ser maior que zero |
+| `NAO_PODE_SER_NEGATIVO` | Valor precisa ser zero ou mais |
+| `TAMANHO_INVALIDO` | Texto ou lista fora do tamanho permitido |
+| `ABAIXO_DO_MINIMO` | Valor abaixo do mínimo |
+| `ACIMA_DO_MAXIMO` | Valor acima do máximo |
+| `FORMATO_INVALIDO` | Texto fora do formato esperado (ex.: e-mail) |
+| `VALOR_INVALIDO` | Valor de tipo errado para o campo (ex.: texto num campo numérico) |
+
+Uma regra de validação nova que não esteja nesta tabela usa o nome da regra em `UPPER_SNAKE_CASE` (por exemplo, `DECIMAL_MIN`) até ganhar um código próprio aqui.
 
 ### 1.7 Concorrência (lock otimista)
 
