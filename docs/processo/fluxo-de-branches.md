@@ -53,11 +53,13 @@ Uma história, task ou bug está **pronto** quando é mergeado na branch da epic
 
 ## Commits
 
-Padrão: `tipo/BREW-<n> #time <tempo> [Descrição em pt-BR]`
+Padrão: `BREW-<n> #time <tempo> [Descrição em pt-BR]`
 
-Exemplo: `feat/BREW-12 #time 2h [Estrutura inicial do monorepo]`
+Exemplo: `BREW-12 #time 2h [Estrutura inicial do monorepo]`
 
 O `#time` é um Smart Commit: o horário é registrado na issue do Jira quando o commit é enviado ao GitHub.
+
+A mensagem começa direto pela chave do Jira, sem o prefixo de tipo. Com `feat/BREW-12` no início da mensagem, o Jira não registrou o tempo. O prefixo `feat/` ou `hotfix/` continua apenas no nome da branch, onde não atrapalha o vínculo com a issue.
 
 ## Integração contínua
 

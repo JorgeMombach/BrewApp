@@ -78,7 +78,7 @@ Histórias: BREW-12 a BREW-66 (55 histórias, 229 pontos). Criar ou alterar issu
 - Branches: `main` ← `epic/BREW-<n>` ← `feat/BREW-<n>` (histórias/tasks) ou `hotfix/BREW-<n>` (bugs). Chave exata do Jira (`BREW-5`, nunca `BREW-05`).
 - Uma epic e uma branch de trabalho por vez. Trabalho entra na epic por PR; sincronização `main` → epic por merge direto.
 - Somente merge commit (squash/rebase desabilitados) para não duplicar `#time` no Jira. Não reescrever commits com `#time` já enviados.
-- Commit: `tipo/BREW-<n> #time <tempo> [Descrição em pt-BR]`.
+- Commit: `BREW-<n> #time <tempo> [Descrição em pt-BR]`. Mensagem começa direto pela chave, sem prefixo de tipo (`feat/BREW-12` na mensagem impede o Smart Commit de registrar o `#time`). O prefixo `feat/`/`hotfix/` fica só no nome da branch.
 - História pronta = mergeada na epic com CI verde.
 - **O agente nunca faz commit, push nem PR.** Deixa as mudanças no working tree e resume o que mudou.
 - Repositório público: nada sensível em commits; `.env` fora do Git; gitleaks no pre-commit.
