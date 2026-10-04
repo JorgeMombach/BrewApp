@@ -1,0 +1,11 @@
+{
+  "name": "brewapp",
+  "private": true,
+  "packageManager": "pnpm@12.9.1",
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

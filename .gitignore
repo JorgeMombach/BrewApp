@@ -1,0 +1,58 @@
+# Segredos e ambiente
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p8
+*.p12
+*.jks
+*.mobileprovision
+
+# Java / Maven
+target/
+*.class
+hs_err_pid*
+replay_pid*
+
+# Node / pnpm / Vite
+node_modules/
+.pnpm-store/
+dist/
+dist-ssr/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+pnpm-debug.log*
+
+# Tauri (o target/ do Rust já está coberto acima)
+**/src-tauri/gen/schemas/
+
+# Expo / React Native (pastas nativas geradas pelo prebuild)
+.expo/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+*.orig.*
+apps/mobile/android/
+apps/mobile/ios/
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.vscode/
+
+# Claude Code (configuração local, não compartilhada)
+.claude/settings.local.json
+
+# Logs
+logs/
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini

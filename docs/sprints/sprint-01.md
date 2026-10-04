@@ -48,6 +48,12 @@ O compromisso fica de propósito abaixo do palpite inicial de velocidade (10 a 1
 | ~09/10 | Checagem de meio de sprint (10 min): o P1 ainda cabe? |
 | 19/10 | Review e retro (30 min) |
 
+## Decisões durante o sprint
+
+| Data | Decisão |
+|---|---|
+| 03/10 | Exceção à Definition of Done: enquanto a BREW-20 (pipeline de CI no GitHub Actions) não for entregue, uma história é considerada pronta quando mergeada na branch da epic, sem exigir CI verde. A partir da entrega da BREW-20, volta a valer a regra normal. |
+
 ## Resultado (preencher na retro)
 
 | História | Pontos | Concluída? | Horas gastas | Observações |
