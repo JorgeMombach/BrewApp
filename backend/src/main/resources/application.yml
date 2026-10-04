@@ -1,0 +1,28 @@
+# Configuração comum a todos os perfis.
+# Valores de ambiente vêm só de variáveis de ambiente, sem valor padrão: se faltar alguma, a aplicação não sobe.
+# Em desenvolvimento, as variáveis vêm do .env da raiz (run configuration do IntelliJ ou exportadas no terminal).
+spring:
+  application:
+    name: brewapp
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Emissor e destinatário validados nos tokens (spec 9.1)
+          issuer-uri: ${BREWAPP_OAUTH_ISSUER_URI}
+          audiences: ${BREWAPP_OAUTH_AUDIENCE}
+
+server:
+  port: ${BREWAPP_SERVER_PORT}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # /actuator/health é a única rota pública (spec 9.2)
+        include: health
+
+brewapp:
+  cors:
+    # Origens separadas por vírgula (spec 9.5)
+    allowed-origins: ${BREWAPP_CORS_ALLOWED_ORIGINS}

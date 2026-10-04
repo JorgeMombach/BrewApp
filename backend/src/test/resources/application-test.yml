@@ -1,0 +1,6 @@
+# Testes (@ActiveProfiles("test")): valores fixos no lugar das variáveis de ambiente.
+# O emissor não é consultado na subida: o JwtDecoder resolve o emissor só no primeiro token recebido.
+BREWAPP_OAUTH_ISSUER_URI: http://localhost:8180/realms/brewapp
+BREWAPP_OAUTH_AUDIENCE: brewapp-api
+BREWAPP_SERVER_PORT: 0
+BREWAPP_CORS_ALLOWED_ORIGINS: http://localhost:5173

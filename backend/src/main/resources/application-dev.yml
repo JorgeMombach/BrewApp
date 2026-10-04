@@ -1,0 +1,9 @@
+# Desenvolvimento local (SPRING_PROFILES_ACTIVE=dev no .env)
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    dev.brewapp: DEBUG

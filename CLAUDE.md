@@ -24,7 +24,7 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 | Web/desktop | React + TypeScript (strict) + Vite + Tauri |
 | Mobile | React Native (Expo), SQLite local |
 | Monorepo | `backend/`, `apps/web/`, `apps/mobile/`, `packages/shared/` (tipos OpenAPI, i18n, catálogo de unidades), `infra/`, `docs/`; pnpm workspaces |
-| IDE do usuário | IntelliJ IDEA Community (sem suporte específico de Spring) |
+| IDE do usuário | IntelliJ IDEA Ultimate (suporte a Spring; `.env` carregado pela run configuration) |
 
 ## Regras de arquitetura (não negociáveis sem ADR)
 
@@ -51,6 +51,17 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 - IDs UUIDv7; eventos com id gerado pelo cliente (idempotência).
 - Unidades: catálogo único (seção 1.11); API devolve valor informado e canônico.
 - Toda rota exige autenticação e declara uma permissão (deny by default).
+
+## Constantes e códigos de erro
+
+| Item | Regra |
+|---|---|
+| Erro de negócio | `throw new ErroDeNegocio(<Enum>.CODIGO, params)`. Um enum por módulo implementando `dev.brewapp.shared.CodigoDeErro` (código = nome da constante, título só para log, `TipoDeErro`). Nunca código como texto solto |
+| Erros genéricos / validação | `dev.brewapp.shared.web.ErroGenerico` e `CodigoDeValidacao`; montagem do corpo só via `Problemas` |
+| Cabeçalhos HTTP | Padrão: `org.springframework.http.HttpHeaders`. Próprios: `dev.brewapp.shared.CabecalhosBrewApp` |
+| Código novo ou renomeado | É mudança de contrato: atualizar `docs/api/design-api.md` (seção 1.6 ou a do endpoint) e `ContratoDeCodigosDeErroTest` juntos |
+| Testes | Códigos e cabeçalhos escritos por extenso de propósito: o teste fixa o contrato |
+| Sem classe global | Nada de `Constantes`/`Utils` global; constante mora perto de quem a usa, no menor escopo. Mensagens de log e de exceções técnicas (config, `IllegalStateException`) ficam no ponto de uso |
 
 ## Jira
 
