@@ -34,6 +34,18 @@ spring:
 server:
   port: ${BREWAPP_SERVER_PORT}
 
+logging:
+  charset:
+    # Sem isso, o console do Windows usa cp1252 e quebra os acentos; no container Linux já é UTF-8
+    console: UTF-8
+  pattern:
+    # Identificador de correlação da requisição (FiltroDeCorrelacao) em cada linha do console.
+    # %notEmpty: fora de requisição (subida, tarefas agendadas) não sobra um "[]" vazio
+    correlation: "%notEmpty{[%X{correlationId}] }"
+  level:
+    # Logo e "dica do dia" do jOOQ na primeira consulta: ruído, principalmente no JSON de produção
+    org.jooq.Constants: WARN
+
 management:
   endpoints:
     web:

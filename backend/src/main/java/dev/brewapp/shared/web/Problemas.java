@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 
@@ -19,6 +20,7 @@ public final class Problemas {
     private static final String BASE_DO_TIPO = "https://brewapp.dev/erros/";
     private static final String PROPRIEDADE_CODE = "code";
     private static final String PROPRIEDADE_PARAMS = "params";
+    private static final String PROPRIEDADE_CORRELATION_ID = "correlationId";
     private static final String PROPRIEDADE_ERRORS = "errors";
     private static final String PROPRIEDADE_CAMPO = "campo";
 
@@ -59,6 +61,11 @@ public final class Problemas {
         problemDetail.setTitle(title);
         problemDetail.setProperty(PROPRIEDADE_CODE, code);
         problemDetail.setProperty(PROPRIEDADE_PARAMS, params);
+        // Preenchido pelo FiltroDeCorrelacao em toda requisição HTTP; fora dela (sem filtro) não há o que devolver
+        String correlationId = MDC.get(FiltroDeCorrelacao.CHAVE_NO_MDC);
+        if (correlationId != null) {
+            problemDetail.setProperty(PROPRIEDADE_CORRELATION_ID, correlationId);
+        }
         problemDetail.setProperty(PROPRIEDADE_ERRORS, List.of());
         return problemDetail;
     }

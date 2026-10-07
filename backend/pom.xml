@@ -41,6 +41,22 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Log4j2 por trás da fachada SLF4J (spec 7), sem Logback: declarado direto, este spring-boot-starter
+             vence os que chegam pelos outros starters, e a exclusão vale para todos. O enforcer garante. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
@@ -114,6 +130,21 @@
 
     <build>
         <plugins>
+            <!-- Desde o Java 23 o processamento de anotações não é mais implícito: o processador do log4j-core
+                 precisa ser declarado para registrar os plugins próprios (PoliticaDeMascaramento) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.apache.logging.log4j</groupId>
+                            <artifactId>log4j-core</artifactId>
+                            <version>${log4j2.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <!-- Expõe o caminho do jar do Mockito como propriedade (org.mockito:mockito-core:jar) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -138,6 +169,30 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- Logback de volta por algum starter novo quebra o build: duas implementações do SLF4J no classpath -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>so-log4j2-como-implementacao</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>ch.qos.logback</exclude>
+                                        <exclude>org.springframework.boot:spring-boot-starter-logging</exclude>
+                                    </excludes>
+                                    <message>Logback não entra no projeto: a implementação do SLF4J é o Log4j2 (spec 7)</message>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Código do jOOQ versionado (spec 5.1): o build padrão só compila o que está commitado -->
             <plugin>

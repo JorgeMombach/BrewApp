@@ -278,10 +278,12 @@ O mecanismo de sincronização é um módulo TypeScript independente, com rede e
 
 ## 7. Logs e observabilidade
 
-- O código registra logs apenas por meio da fachada **SLF4J**; o **Log4j2** é a implementação. A troca de implementação não afeta nenhuma classe.
+- O código registra logs apenas por meio da fachada **SLF4J**; o **Log4j2** é a implementação. A troca de implementação não afeta nenhuma classe. O Logback fica proibido no build, e uma regra de arquitetura impede o uso direto da API do Log4j2 fora da infraestrutura de log.
 - **Desenvolvimento:** todas as consultas SQL são registradas com os valores preenchidos, prontas para copiar e executar.
-- **Produção:** apenas consultas lentas são registradas, com o tempo de execução e **sem os valores**, para não expor dados sensíveis.
-- Logs estruturados em JSON em produção, com um **identificador de correlação** por requisição, inclusive nas sincronizações vindas do celular.
+- **Produção:** apenas consultas lentas são registradas, com o tempo de execução e **sem os valores**, para não expor dados sensíveis. O limite começa em 500 ms e é configurável. O driver do PostgreSQL também deixa de incluir nas exceções o detalhe do erro, que costuma trazer valores de registros (por exemplo, o e-mail que violou uma chave única).
+- Logs estruturados em JSON em produção, no formato Elastic Common Schema (ECS). Em desenvolvimento, o log é texto.
+- Cada requisição tem um **identificador de correlação**, inclusive nas sincronizações vindas do celular. Ele vem do cliente ou é gerado pelo servidor, aparece em toda linha de log da requisição e volta na resposta, tanto no cabeçalho quanto no corpo dos erros.
+- **Mascaramento:** todo evento de log passa por um mascaramento antes de ser escrito. Tokens, credenciais e segredos são sempre ocultados, e e-mails ficam só com a primeira letra e o domínio. A exceção é o SQL registrado em desenvolvimento, que mantém o e-mail para continuar executável, mas ainda oculta os tokens. O mascaramento é a segunda linha de defesa: ele não alcança o stack trace das exceções nem reconhece dados pessoais em texto livre, como nomes. Por isso a primeira defesa continua sendo não colocar dado pessoal em mensagens de log nem de exceção.
 - Métricas via Actuator e Micrometer, com Prometheus e Grafana opcionais no ambiente local.
 
 ---
