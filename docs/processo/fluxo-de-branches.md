@@ -49,7 +49,7 @@ A CI roda no push para a branch da epic, então a sincronização é verificada 
 
 ## Quando uma história está pronta
 
-Uma história, task ou bug está **pronto** quando é mergeado na branch da epic com a CI verde. A chegada da epic à `main` é uma entrega de release, não uma condição para concluir histórias no sprint.
+Uma história, task ou bug está **pronto** quando é mergeado na branch da epic com a CI verde e atende aos critérios da [Definition of Done](definition-of-done.md), que é a referência completa. A chegada da epic à `main` é uma entrega de release, não uma condição para concluir histórias no sprint.
 
 ## Commits
 

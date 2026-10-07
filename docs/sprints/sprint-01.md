@@ -53,6 +53,7 @@ O compromisso fica de propósito abaixo do palpite inicial de velocidade (10 a 1
 | Data | Decisão |
 |---|---|
 | 03/10 | Exceção à Definition of Done: enquanto a BREW-20 (pipeline de CI no GitHub Actions) não for entregue, uma história é considerada pronta quando mergeada na branch da epic, sem exigir CI verde. A partir da entrega da BREW-20, volta a valer a regra normal. |
+| 07/10 | Definition of Done revisada e aprovada (BREW-21), antes da primeira história de negócio. Vale a partir das próximas entregas; o checklist fica no template de pull request. |
 
 ## Resultado (preencher na retro)
 
