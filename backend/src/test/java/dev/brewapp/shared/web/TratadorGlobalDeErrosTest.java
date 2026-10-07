@@ -143,6 +143,7 @@ class TratadorGlobalDeErrosTest {
                 .andExpect(jsonPath("$.status").value(status))
                 .andExpect(jsonPath("$.code").value(code))
                 .andExpect(jsonPath("$.params").isMap())
+                .andExpect(jsonPath("$.correlationId").isString())
                 .andExpect(jsonPath("$.errors").isArray());
     }
 

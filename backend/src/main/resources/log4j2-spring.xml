@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Baseado no log4j2.xml padrão do Spring Boot 4.1 (spring-boot.jar, org/springframework/boot/logging/log4j2).
+    Diferença: todo evento passa pela PoliticaDeMascaramento antes do console (DoD, critério 4).
+    Formato: texto com o padrão do Boot, ou JSON quando logging.structured.format.console está definido (prod: ECS).
+    Sem appender de arquivo: logging.file.* não tem efeito; a saída é só o console (container).
+-->
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd'T'HH:mm:ss.SSSXXX</Property>
+        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{${sys:LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${sys:LOG_LEVEL_PATTERN}} %clr{%pid}{magenta} %clr{--- %esb{${sys:APPLICATION_NAME:-}}%esb{${sys:APPLICATION_GROUP:-}}[%15.15t] ${sys:LOG_CORRELATION_PATTERN:-}}{faint}%clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <Select>
+                <SystemPropertyArbiter propertyName="CONSOLE_LOG_STRUCTURED_FORMAT">
+                    <StructuredLogLayout format="${sys:CONSOLE_LOG_STRUCTURED_FORMAT}" charset="${sys:CONSOLE_LOG_CHARSET}"/>
+                </SystemPropertyArbiter>
+                <DefaultArbiter>
+                    <PatternLayout pattern="${sys:CONSOLE_LOG_PATTERN}" charset="${sys:CONSOLE_LOG_CHARSET}"/>
+                </DefaultArbiter>
+            </Select>
+            <Filters>
+                <ThresholdFilter level="${sys:CONSOLE_LOG_THRESHOLD:-TRACE}"/>
+            </Filters>
+        </Console>
+        <Select>
+            <!-- Em desenvolvimento, o SQL do jOOQ mantém o e-mail visível para continuar pronto para copiar e executar.
+                 Tokens e segredos são mascarados em qualquer perfil -->
+            <SpringProfile name="dev">
+                <Rewrite name="ConsoleMascarado">
+                    <PoliticaDeMascaramento loggersComEmailVisivel="org.jooq.tools.LoggerListener"/>
+                    <AppenderRef ref="Console"/>
+                </Rewrite>
+            </SpringProfile>
+            <DefaultArbiter>
+                <Rewrite name="ConsoleMascarado">
+                    <PoliticaDeMascaramento/>
+                    <AppenderRef ref="Console"/>
+                </Rewrite>
+            </DefaultArbiter>
+        </Select>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR"/>
+        <Logger name="org.apache.catalina.util.LifecycleBase" level="ERROR"/>
+        <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="WARN"/>
+        <Logger name="org.apache.sshd.common.util.SecurityUtils" level="WARN"/>
+        <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="WARN"/>
+        <Logger name="org.eclipse.jetty.util.component.AbstractLifeCycle" level="ERROR"/>
+        <Logger name="org.hibernate.validator.internal.util.Version" level="WARN"/>
+        <Logger name="org.springframework.boot.actuate.endpoint.jmx" level="WARN"/>
+        <Root level="INFO">
+            <AppenderRef ref="ConsoleMascarado"/>
+        </Root>
+    </Loggers>
+</Configuration>

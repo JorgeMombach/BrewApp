@@ -143,6 +143,7 @@ class SegurancaTest {
                 .andExpect(jsonPath("$.code").value("NAO_AUTENTICADO"))
                 .andExpect(jsonPath("$.type").value("https://brewapp.dev/erros/nao-autenticado"))
                 .andExpect(jsonPath("$.params").isMap())
+                .andExpect(jsonPath("$.correlationId").isString())
                 .andExpect(jsonPath("$.errors").isArray());
     }
 

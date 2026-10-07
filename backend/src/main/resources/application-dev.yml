@@ -7,3 +7,6 @@ management:
 logging:
   level:
     dev.brewapp: DEBUG
+    # Todo SQL do jOOQ com os valores preenchidos ("-> with bind values"), pronto para copiar e executar (spec 7).
+    # Só em desenvolvimento: o listener também registra as primeiras linhas de cada resultado
+    org.jooq.tools.LoggerListener: DEBUG

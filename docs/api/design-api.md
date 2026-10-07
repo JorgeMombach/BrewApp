@@ -33,7 +33,7 @@ Estas regras valem para todos os endpoints, sem exceção.
 |---|---|---|---|
 | `Authorization: Bearer <token>` | requisição | sempre, exceto `/actuator/health` | token emitido pelo Keycloak |
 | `X-Organization-Id` | requisição | em todo recurso de negócio | organização em uso; validada contra os vínculos do usuário |
-| `X-Correlation-Id` | requisição e resposta | não | se enviado, é reaproveitado; se não, o servidor gera. Sempre volta na resposta |
+| `X-Correlation-Id` | requisição e resposta | não | se enviado, é reaproveitado; se não, o servidor gera um UUID. Sempre volta na resposta. Formato aceito: 1 a 64 caracteres entre letras, dígitos, `.`, `_` e `-`; fora disso, o valor enviado é descartado e o servidor gera outro (o identificador vai para os logs) |
 | `Accept-Language` | requisição | não | **ignorado pelo backend** para mensagens (o cliente traduz); usado apenas como sugestão de idioma no primeiro acesso |
 | `ETag` / `If-Match` | resposta / requisição | `If-Match` em toda alteração de recurso mutável | controle de concorrência (ver 1.7) |
 
@@ -91,6 +91,7 @@ Todos os erros seguem o formato **Problem Details (RFC 9457)**, estendido com um
 ```
 
 - `code` é o contrato. O `title` existe só para leitura humana em logs e ferramentas; **o cliente nunca exibe o `title`**, e sim a tradução do `code`.
+- `correlationId` é o mesmo valor do cabeçalho `X-Correlation-Id` da resposta. Vem em todo erro, inclusive nos 401 e 403 da camada de segurança, para que o usuário possa informá-lo ao relatar um problema.
 - Em erros de validação, `errors` lista cada campo com problema: `{ "campo": "capacidade.valor", "code": "DEVE_SER_POSITIVO", "params": {} }`.
 - Nenhuma resposta de erro contém stack trace, nome de classe, SQL ou detalhe interno.
 

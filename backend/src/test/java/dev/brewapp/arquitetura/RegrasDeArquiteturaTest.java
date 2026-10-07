@@ -15,6 +15,7 @@ class RegrasDeArquiteturaTest {
 
     private static final String PACOTE_DO_RELOGIO = "dev.brewapp.shared.time..";
     private static final String PACOTE_DE_PERSISTENCIA = "..adapter.out.persistence..";
+    private static final String PACOTE_DA_INFRAESTRUTURA_DE_LOG = "dev.brewapp.shared.logging..";
 
     /**
      * Domínio é Java puro (spec 4.3). Vale também para o pacote raiz do shared (núcleo compartilhado,
@@ -36,6 +37,17 @@ class RegrasDeArquiteturaTest {
             .that().resideOutsideOfPackage(PACOTE_DE_PERSISTENCIA)
             .should().dependOnClassesThat().resideInAnyPackage("org.jooq..", "..adapter.out.persistence.jooq..")
             .because("os tipos do jOOQ não saem da camada de persistência; as conversões acontecem no adapter");
+
+    /**
+     * Logs só pela fachada SLF4J (spec 7): trocar a implementação não pode afetar nenhuma classe.
+     * A exceção é a infraestrutura de log, que implementa plugins do próprio Log4j2 (ex.: mascaramento).
+     */
+    @ArchTest
+    static final ArchRule logsSoPeloSlf4j = noClasses()
+            .that().resideOutsideOfPackage(PACOTE_DA_INFRAESTRUTURA_DE_LOG)
+            .should().dependOnClassesThat().resideInAnyPackage("org.apache.logging.log4j..", "ch.qos.logback..", "java.util.logging..")
+            .because("o código loga só via SLF4J; o Log4j2 é detalhe de implementação, configurado em "
+                    + PACOTE_DA_INFRAESTRUTURA_DE_LOG);
 
     /** Tempo sempre pelo Clock injetado (spec 10): now() só é aceito recebendo um Clock. */
     @ArchTest

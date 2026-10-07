@@ -2,6 +2,23 @@
 spring:
   main:
     banner-mode: off
+  datasource:
+    hikari:
+      data-source-properties:
+        # O driver não inclui o "Detail" do Postgres nas exceções: ele traz valores, como "Key (email)=(...)",
+        # que chegariam ao log pelo TratadorGlobalDeErros (spec 7, sem dados sensíveis)
+        logServerErrorDetail: false
+
+logging:
+  structured:
+    format:
+      # JSON estruturado (Elastic Common Schema), com o MDC (correlationId) em cada evento (spec 7)
+      console: ecs
+
+brewapp:
+  sql:
+    # Só consultas a partir deste tempo são logadas, sem os valores (ListenerDeConsultasLentas, spec 7)
+    limite-de-consulta-lenta: 500ms
 
 management:
   endpoint:
