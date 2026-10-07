@@ -8,7 +8,8 @@ Diário de adega para cervejarias: acompanhamento estruturado do lote do mosto r
 |---|---|
 | `docs/specs/2026-10-03-mvp-diario-adega-design.md` | Spec do MVP: domínio, arquitetura, dados, offline, segurança, testes, lista de ADRs (seção 11) |
 | `docs/api/design-api.md` | Design da API (contrato a seguir): convenções (seção 1), endpoints por módulo (2–7) |
-| `docs/processo/fluxo-de-branches.md` | Branches, commits, merges, rulesets, definição de pronto |
+| `docs/processo/fluxo-de-branches.md` | Branches, commits, merges, rulesets |
+| `docs/processo/definition-of-done.md` | Definition of Done: critérios gerais e por tipo de mudança (espelhada em `.github/pull_request_template.md`) |
 | `docs/sprints/sprint-NN.md` | Plano e resultado de cada sprint |
 
 Divergência entre código e docs: parar e perguntar. Mudança de decisão: atualizar o doc correspondente (e o Jira) junto.
@@ -103,6 +104,8 @@ Ordem: BREW-12 (2) → BREW-13 (3) → BREW-14 (3) → BREW-21 (1) [compromisso]
 ## Como trabalhar neste projeto
 
 - Para cada história: ler os critérios de aceite no Jira, propor um plano técnico em fases numeradas e parar entre cada fase para validação.
-- Ao concluir uma história: checar os critérios de aceite um a um e a Definition of Done (BREW-21), e lembrar o usuário de registrar as horas.
+- Ao concluir uma história: checar os critérios de aceite um a um e a Definition of Done (`docs/processo/definition-of-done.md`) item a item, marcando "não se aplica" com motivo; lembrar o usuário de registrar as horas.
+- DoD e template de PR andam juntos: mudar um exige mudar o outro, com decisão registrada no `docs/sprints/sprint-NN.md`.
+- Índice novo ou consulta dependente de índice: `EXPLAIN (ANALYZE, BUFFERS)` + nº de linhas da tabela vai na descrição da PR, não no repositório.
 - Decisão de arquitetura nova ou alterada: propor ADR em `docs/adr/`.
 - Na retro: preencher a seção "Resultado" do `docs/sprints/sprint-NN.md` com pontos concluídos e horas.
