@@ -14,6 +14,7 @@ import java.time.Clock;
 class RegrasDeArquiteturaTest {
 
     private static final String PACOTE_DO_RELOGIO = "dev.brewapp.shared.time..";
+    private static final String PACOTE_DE_PERSISTENCIA = "..adapter.out.persistence..";
 
     /**
      * Domínio é Java puro (spec 4.3). Vale também para o pacote raiz do shared (núcleo compartilhado,
@@ -25,6 +26,16 @@ class RegrasDeArquiteturaTest {
             .or().resideInAPackage("dev.brewapp.shared")
             .should().dependOnClassesThat().resideInAnyPackage("org.springframework..", "org.jooq..")
             .because("o domínio e o núcleo compartilhado são Java puro, sem Spring nem jOOQ (spec 4.3)");
+
+    /**
+     * jOOQ só na persistência (spec 4.3): records e tabelas geradas não chegam a casos de uso, domínio nem web.
+     * As classes geradas ficam em ..adapter.out.persistence.jooq de cada módulo, dentro do pacote permitido.
+     */
+    @ArchTest
+    static final ArchRule jooqSoNaPersistencia = noClasses()
+            .that().resideOutsideOfPackage(PACOTE_DE_PERSISTENCIA)
+            .should().dependOnClassesThat().resideInAnyPackage("org.jooq..", "..adapter.out.persistence.jooq..")
+            .because("os tipos do jOOQ não saem da camada de persistência; as conversões acontecem no adapter");
 
     /** Tempo sempre pelo Clock injetado (spec 10): now() só é aceito recebendo um Clock. */
     @ArchTest

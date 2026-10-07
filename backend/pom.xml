@@ -21,6 +21,9 @@
         <java.version>25</java.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <archunit.version>1.5.1</archunit.version>
+        <gmavenplus-plugin.version>4.2.0</gmavenplus-plugin.version>
+        <!-- Código gerado pelo jOOQ, versionado; regenerado só pelo profile jooq-codegen -->
+        <jooq.codegen.diretorio>${project.basedir}/src/main/generated</jooq.codegen.diretorio>
         <!-- Vazio por padrão para o @{argLine} do Surefire funcionar sem outro plugin (ex.: JaCoCo) definindo-o -->
         <argLine/>
     </properties>
@@ -55,6 +58,24 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
         </dependency>
+        <!-- Persistência schema-first (spec 5.1): Flyway aplica as migrations, jOOQ consulta -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jooq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -76,6 +97,17 @@
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
             <version>${archunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- PostgreSQL real nos testes, nunca H2 (spec 10) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -107,6 +139,244 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!-- Código do jOOQ versionado (spec 5.1): o build padrão só compila o que está commitado -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>codigo-gerado-pelo-jooq</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${jooq.codegen.diretorio}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+            Regenera o código do jOOQ a partir das migrations: mvnw -Pjooq-codegen generate-sources
+            1. initialize: sobe um PostgreSQL descartável (Testcontainers) com as roles do init script do docker-compose
+            2. generate-sources: o Flyway aplica as migrations com a role de migração, como na aplicação
+            3. generate-sources: o jOOQ gera as classes de cada schema dentro da persistência do próprio módulo
+            O container é removido pelo Ryuk no fim do build. Credenciais abaixo valem só para esse container.
+        -->
+        <profile>
+            <id>jooq-codegen</id>
+            <properties>
+                <jooq.codegen.imagem>postgres:18.6</jooq.codegen.imagem>
+                <jooq.codegen.role-de-migracao>brewapp_owner</jooq.codegen.role-de-migracao>
+                <jooq.codegen.senha-de-migracao>codegen</jooq.codegen.senha-de-migracao>
+                <jooq.codegen.role-da-aplicacao>brewapp_app</jooq.codegen.role-da-aplicacao>
+                <jooq.codegen.pacote>adapter.out.persistence.jooq</jooq.codegen.pacote>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.gmavenplus</groupId>
+                        <artifactId>gmavenplus-plugin</artifactId>
+                        <version>${gmavenplus-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>subir-postgres-do-codegen</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <scripts>
+                                        <script><![CDATA[
+                                            import org.testcontainers.postgresql.PostgreSQLContainer
+                                            import org.testcontainers.utility.MountableFile
+
+                                            def propriedades = project.properties
+                                            def initScript = new File(project.basedir, '../infra/postgres/init/01-init.sh').canonicalPath
+                                            def postgreSQLContainer = new PostgreSQLContainer(propriedades['jooq.codegen.imagem'])
+                                                    .withDatabaseName('brewapp')
+                                                    .withEnv('BREWAPP_DB_OWNER_USER', propriedades['jooq.codegen.role-de-migracao'])
+                                                    .withEnv('BREWAPP_DB_OWNER_PASSWORD', propriedades['jooq.codegen.senha-de-migracao'])
+                                                    .withEnv('BREWAPP_DB_APP_USER', propriedades['jooq.codegen.role-da-aplicacao'])
+                                                    .withEnv('BREWAPP_DB_APP_PASSWORD', 'codegen')
+                                                    .withEnv('KC_DB_USERNAME', 'keycloak')
+                                                    .withEnv('KC_DB_PASSWORD', 'codegen')
+                                                    .withCopyFileToContainer(
+                                                            MountableFile.forHostPath(initScript, 0755),
+                                                            '/docker-entrypoint-initdb.d/01-init.sh')
+                                            postgreSQLContainer.start()
+                                            propriedades['jooq.codegen.url'] = postgreSQLContainer.jdbcUrl
+                                            log.info("PostgreSQL do codegen em ${postgreSQLContainer.jdbcUrl}")
+                                        ]]></script>
+                                    </scripts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.groovy</groupId>
+                                <artifactId>groovy</artifactId>
+                                <version>${groovy.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.testcontainers</groupId>
+                                <artifactId>testcontainers-postgresql</artifactId>
+                                <version>${testcontainers.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                    <!-- Mesma configuração do spring.flyway do application.yml -->
+                    <plugin>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>migrar-postgres-do-codegen</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>migrate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <url>${jooq.codegen.url}</url>
+                            <user>${jooq.codegen.role-de-migracao}</user>
+                            <password>${jooq.codegen.senha-de-migracao}</password>
+                            <schemas>
+                                <schema>flyway</schema>
+                            </schemas>
+                            <locations>
+                                <location>filesystem:${project.basedir}/src/main/resources/db/migration</location>
+                            </locations>
+                            <placeholders>
+                                <appRole>${jooq.codegen.role-da-aplicacao}</appRole>
+                            </placeholders>
+                            <validateMigrationNaming>true</validateMigrationNaming>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.flywaydb</groupId>
+                                <artifactId>flyway-database-postgresql</artifactId>
+                                <version>${flyway.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                    <!-- Uma execução por schema: cada módulo só enxerga as próprias tabelas (spec 5.1) -->
+                    <plugin>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-codegen-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jooq-organizacao</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>
+                                        <database>
+                                            <inputSchema>organizacao</inputSchema>
+                                        </database>
+                                        <target>
+                                            <packageName>dev.brewapp.organizacao.${jooq.codegen.pacote}</packageName>
+                                        </target>
+                                    </generator>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jooq-recipiente</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>
+                                        <database>
+                                            <inputSchema>recipiente</inputSchema>
+                                        </database>
+                                        <target>
+                                            <packageName>dev.brewapp.recipiente.${jooq.codegen.pacote}</packageName>
+                                        </target>
+                                    </generator>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jooq-lote</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>
+                                        <database>
+                                            <inputSchema>lote</inputSchema>
+                                        </database>
+                                        <target>
+                                            <packageName>dev.brewapp.lote.${jooq.codegen.pacote}</packageName>
+                                        </target>
+                                    </generator>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jooq-adega</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>
+                                        <database>
+                                            <inputSchema>adega</inputSchema>
+                                        </database>
+                                        <target>
+                                            <packageName>dev.brewapp.adega.${jooq.codegen.pacote}</packageName>
+                                        </target>
+                                    </generator>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <jdbc>
+                                <driver>org.postgresql.Driver</driver>
+                                <url>${jooq.codegen.url}</url>
+                                <user>${jooq.codegen.role-de-migracao}</user>
+                                <password>${jooq.codegen.senha-de-migracao}</password>
+                            </jdbc>
+                            <generator>
+                                <database>
+                                    <name>org.jooq.meta.postgres.PostgresDatabase</name>
+                                </database>
+                                <generate>
+                                    <!-- Schema sem tabelas também gera a sua classe: o módulo já nasce com o pacote -->
+                                    <emptyCatalogs>true</emptyCatalogs>
+                                    <emptySchemas>true</emptySchemas>
+                                </generate>
+                                <target>
+                                    <directory>${jooq.codegen.diretorio}</directory>
+                                </target>
+                            </generator>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

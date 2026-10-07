@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import dev.brewapp.shared.CodigoDeErro;
 import dev.brewapp.shared.ErroDeNegocio;
 import dev.brewapp.shared.TipoDeErro;
+import dev.brewapp.shared.persistence.PostgresDeTeste;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
@@ -46,7 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TratadorGlobalDeErrosTest.ControladorDeTeste.class)
+@Import({TratadorGlobalDeErrosTest.ControladorDeTeste.class, PostgresDeTeste.class})
 class TratadorGlobalDeErrosTest {
 
     private static final String SEGREDO_INTERNO = "select * from adega.evento where senha = 'segredo'";

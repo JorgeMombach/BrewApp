@@ -186,9 +186,10 @@ As regras de cálculo que precisam rodar nos dois lados (conversão entre graus 
 
 ### 5.1 Princípios
 
-- **Um schema do PostgreSQL por módulo.** Nenhum módulo lê as tabelas de outro. É isso que torna a extração de serviços viável.
-- **O banco é a fonte da verdade do schema.** O Flyway aplica as migrations, e o jOOQ gera as classes a partir do banco real (um PostgreSQL em container durante o build). O código gerado não é versionado.
-- **Migration aplicada nunca é editada;** correções são sempre novas migrations. As versões usam data e hora, para evitar colisões entre módulos.
+- **Um schema do PostgreSQL por módulo.** Nenhum módulo lê as tabelas de outro. É isso que torna a extração de serviços viável. Módulos sem dados próprios (a Comparação, que só lê pelas interfaces do Lote e da Adega) não têm schema.
+- **O banco é a fonte da verdade do schema.** O Flyway aplica as migrations, e o jOOQ gera as classes a partir do banco real (um PostgreSQL em container, num profile do Maven acionado quando uma migration muda). O código gerado é versionado, para que o projeto compile logo após o clone e a pull request mostre o impacto de cada migration. Em troca, uma checagem de divergência regenera o código e falha se ele não bater com o que está versionado. As classes geradas de cada schema ficam dentro da camada de persistência do próprio módulo, e as fronteiras entre módulos impedem que um use as tabelas do outro.
+- **Migration aplicada nunca é editada;** correções são sempre novas migrations. Cada módulo tem a sua pasta de migrations, e as versões usam data e hora (por exemplo, `V20261007_1400__cria_schema_lote.sql`), para evitar colisões entre módulos. Duas migrations nunca têm a mesma data e hora, mesmo em pastas diferentes.
+- **Duas roles no banco.** A role de migração é dona dos schemas e das tabelas e só é usada pelo Flyway. A aplicação conecta com outra role, que lê, insere e altera dados, mas não cria nem altera estruturas e não exclui linhas: a exclusão física é exceção (seção 5.5) e é concedida tabela a tabela, na migration que precisar dela.
 
 ### 5.2 Modelagem dos eventos
 

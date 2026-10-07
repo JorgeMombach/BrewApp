@@ -19,7 +19,7 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 | Camada | Tecnologia |
 |---|---|
 | Backend | Java 25, Spring Boot 4, Spring Modulith, Spring Security (Resource Server OIDC), Maven |
-| Dados | PostgreSQL 18, Flyway, jOOQ (schema-first, codegen via Testcontainers no build; código gerado fora do Git) |
+| Dados | PostgreSQL 18, Flyway, jOOQ (schema-first; codegen via Testcontainers no profile `jooq-codegen`; código gerado commitado em `backend/src/main/generated/`, com checagem de divergência) |
 | Auth | Keycloak (OIDC, Authorization Code + PKCE) |
 | Logs | SLF4J + Log4j2 |
 | Web/desktop | React + TypeScript (strict) + Vite + Tauri |

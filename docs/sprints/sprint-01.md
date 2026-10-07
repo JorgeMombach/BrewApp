@@ -54,6 +54,7 @@ O compromisso fica de propósito abaixo do palpite inicial de velocidade (10 a 1
 |---|---|
 | 03/10 | Exceção à Definition of Done: enquanto a BREW-20 (pipeline de CI no GitHub Actions) não for entregue, uma história é considerada pronta quando mergeada na branch da epic, sem exigir CI verde. A partir da entrega da BREW-20, volta a valer a regra normal. |
 | 07/10 | Definition of Done revisada e aprovada (BREW-21), antes da primeira história de negócio. Vale a partir das próximas entregas; o checklist fica no template de pull request. |
+| 07/10 | Código gerado pelo jOOQ passa a ser versionado (BREW-15), revertendo a spec 5.1: o projeto compila logo após o clone e a pull request mostra o impacto das migrations. O codegen sai do build padrão para o profile `jooq-codegen`, e uma checagem de divergência (regenerar e falhar se houver diferença) entra na DoD e no template de pull request. Até a BREW-20 a checagem é local; depois, vira job da CI. |
 
 ## Resultado (preencher na retro)
 
