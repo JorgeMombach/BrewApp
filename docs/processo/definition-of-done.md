@@ -51,6 +51,7 @@ Valem para toda entrega.
 ### Migrations e índices
 
 - Toda mudança de banco é uma migration nova. Uma migration que já foi mergeada em uma epic nunca é editada: a correção vira outra migration.
+- O código gerado pelo jOOQ é regenerado a partir das migrations e commitado junto com elas. Antes de abrir a pull request, o codegen roda de novo e não pode produzir nenhuma diferença em relação ao que está commitado. Enquanto a BREW-20 não for entregue, essa checagem é feita localmente; depois, ela passa a ser um job da CI. Os comandos estão no ADR 0002.
 - Índice novo, ou consulta nova que dependa de um índice, vem com a saída de `EXPLAIN (ANALYZE, BUFFERS)` na descrição da pull request. A saída informa com quantas linhas a tabela estava, porque um plano gerado com uma tabela quase vazia não mostra se o índice está sendo usado.
 
 ### Endpoints

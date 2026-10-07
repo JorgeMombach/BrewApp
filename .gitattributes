@@ -5,6 +5,9 @@
 *.cmd text eol=crlf
 *.bat text eol=crlf
 
+# Código gerado pelo jOOQ (versionado; regenerado pelo profile jooq-codegen): colapsado no diff do GitHub
+backend/src/main/generated/** linguist-generated=true
+
 # Binários
 *.png binary
 *.jpg binary

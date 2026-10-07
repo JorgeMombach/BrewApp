@@ -44,6 +44,7 @@
 ### Migrations e índices
 
 - [ ] Mudança de banco em migration nova; nenhuma migration já mergeada foi editada
+- [ ] Código do jOOQ regenerado e commitado; checagem de divergência sem diferença
 - [ ] Plano de execução na seção acima para índice ou consulta nova
 
 ### Endpoints

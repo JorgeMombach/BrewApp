@@ -4,6 +4,25 @@
 spring:
   application:
     name: brewapp
+  datasource:
+    url: ${BREWAPP_DB_URL}
+    # Role da aplicação: sem ser dona das tabelas e sem DDL, para que o RLS seja aplicado (spec 9.3)
+    username: ${BREWAPP_DB_APP_USER}
+    password: ${BREWAPP_DB_APP_PASSWORD}
+  flyway:
+    # Só o Flyway usa a role dona das tabelas; a URL é a mesma do datasource
+    user: ${BREWAPP_DB_OWNER_USER}
+    password: ${BREWAPP_DB_OWNER_PASSWORD}
+    # Schema do histórico do Flyway, criado por ele mesmo. Os schemas dos módulos são criados pelas migrations,
+    # em db/migration/<modulo>/ (o Flyway varre as subpastas de db/migration)
+    schemas: flyway
+    # Nome de arquivo fora do padrão quebra a subida em vez de a migration ser ignorada em silêncio
+    validate-migration-naming: true
+    placeholders:
+      # Role que recebe os grants nos schemas dos módulos
+      appRole: ${BREWAPP_DB_APP_USER}
+  jooq:
+    sql-dialect: postgres
   security:
     oauth2:
       resourceserver:

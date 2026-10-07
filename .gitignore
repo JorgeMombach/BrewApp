@@ -42,7 +42,9 @@ apps/mobile/ios/
 *.iml
 *.ipr
 *.iws
-out/
+# Saída de compilação do IntelliJ, só na raiz ou na pasta de um módulo: "out/" solto ignoraria os adapter/out/ da hexagonal
+/out/
+/*/out/
 .vscode/
 
 # Claude Code (configuração local, não compartilhada)
