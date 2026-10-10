@@ -113,3 +113,4 @@ Jobs de CI de front: cada história de front (17, 18, 19) adiciona o seu job ao 
 - Índice novo ou consulta dependente de índice: `EXPLAIN (ANALYZE, BUFFERS)` + nº de linhas da tabela vai na descrição da PR, não no repositório.
 - Decisão de arquitetura nova ou alterada: propor ADR em `docs/adr/`.
 - Na retro: preencher a seção "Resultado" do `docs/sprints/sprint-NN.md` com pontos concluídos e horas.
+- Review, retro, planning e ampliação de sprint seguem a skill `/cerimonias-sprint` (`.claude/skills/cerimonias-sprint/SKILL.md`).
