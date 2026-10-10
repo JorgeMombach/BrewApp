@@ -83,7 +83,7 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 | Mobile e offline | BREW-10 |
 | Comparação de lotes | BREW-11 |
 
-Histórias: BREW-12 a BREW-67 (56 histórias; 229 pontos estimados, BREW-67 ainda sem estimativa). Criar ou alterar issues somente com aprovação explícita do usuário.
+Itens: BREW-12 a BREW-69 (56 histórias, 1 task, 1 bug; 231 pontos estimados, BREW-67 ainda sem estimativa). Criar ou alterar issues somente com aprovação explícita do usuário.
 
 ## Git
 
@@ -99,7 +99,11 @@ Histórias: BREW-12 a BREW-67 (56 histórias; 229 pontos estimados, BREW-67 aind
 
 Objetivo: backend Java 25/Spring Boot 4 subindo localmente com Postgres e Keycloak via docker-compose, com regras de arquitetura verificadas no build.
 
-Ordem: BREW-12 (2) → BREW-13 (3) → BREW-14 (3) → BREW-21 (1) [compromisso] → BREW-15 (5) [P1] → BREW-16 (3) [P2].
+Backlog original (BREW-12, 13, 14, 21, 15, 16; 17 pontos) concluído em 07/10. Ampliado em 10/10 com o restante da epic BREW-5, nesta ordem:
+
+BREW-68 (1, task README) → BREW-69 (2, bug de mascaramento de exceções) → BREW-20 (5) → BREW-18 (3) → BREW-45 (5) [compromisso] → BREW-17 (3) → BREW-19 (3) → BREW-22 (2) [se der].
+
+Jobs de CI de front: cada história de front (17, 18, 19) adiciona o seu job ao pipeline da BREW-20. Detalhes e decisões em `docs/sprints/sprint-01.md`.
 
 ## Como trabalhar neste projeto
 
