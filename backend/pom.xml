@@ -22,6 +22,10 @@
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <archunit.version>1.5.1</archunit.version>
         <gmavenplus-plugin.version>4.2.0</gmavenplus-plugin.version>
+        <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>
+        <palantir-java-format.version>2.102.0</palantir-java-format.version>
+        <!-- Ref do Git usada como base pelo Spotless; a CI troca pela branch de destino da pull request -->
+        <formatacao.base>HEAD</formatacao.base>
         <!-- Código gerado pelo jOOQ, versionado; regenerado só pelo profile jooq-codegen -->
         <jooq.codegen.diretorio>${project.basedir}/src/main/generated</jooq.codegen.diretorio>
         <!-- Vazio por padrão para o @{argLine} do Surefire funcionar sem outro plugin (ex.: JaCoCo) definindo-o -->
@@ -212,6 +216,32 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Formatação só nos arquivos alterados em relação a ${formatacao.base} (spec 10). Todo build local
+                 formata o que mudou desde o último commit; no checkout limpo da CI não há o que formatar, e quem
+                 verifica é o spotless:check comparando com a branch de destino da pull request -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>formatar-arquivos-alterados</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <ratchetFrom>${formatacao.base}</ratchetFrom>
+                    <java>
+                        <palantirJavaFormat>
+                            <version>${palantir-java-format.version}</version>
+                        </palantirJavaFormat>
+                        <removeUnusedImports/>
+                    </java>
+                </configuration>
             </plugin>
         </plugins>
     </build>

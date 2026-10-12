@@ -41,6 +41,12 @@ git push
 
 A CI roda no push para a branch da epic, então a sincronização é verificada logo em seguida. As branches de trabalho continuam entrando na epic por pull request.
 
+### Atualizações do Dependabot
+
+O Dependabot abre, toda semana, pull requests que atualizam dependências (Maven, npm e as próprias actions da CI) em branches `dependabot/...`. Elas vão **direto para a `main`**, como um hotfix: atualização de dependência é manutenção, não pertence a nenhuma epic. Depois do merge, a `main` é sincronizada na epic em andamento, como em qualquer correção que chega à `main`.
+
+Essas pull requests não seguem o padrão de nome de branch nem de commit (não têm chave do Jira nem `#time`), e por isso não aparecem no sprint.
+
 ## Merges
 
 - **Somente merge commit.** Squash e rebase estão desabilitados no repositório.
@@ -64,11 +70,15 @@ A mensagem começa direto pela chave do Jira, sem o prefixo de tipo. Com `feat/B
 ## Integração contínua
 
 - CI completa em toda pull request para `main` e para `epic/**`, e em push nessas branches.
+- Um workflow (`CI`) com um job por área do monorepo. Cada job só roda quando a sua área muda (filtro de caminho). A varredura de segredos (gitleaks) e de dependências vulneráveis (Trivy) roda sempre.
+- O job **`CI concluída`** sempre roda e falha se algum outro job falhou. É o único check obrigatório do ruleset. Assim, um job pulado pelo filtro não deixa o merge esperando para sempre.
+- A análise estática (CodeQL) fica num workflow próprio e também roda toda semana. Ela bloqueia o merge pela regra de resultados de code scanning do ruleset.
+- A formatação é verificada só na pull request, e só nos arquivos alterados em relação à branch de destino.
 - Proteções (rulesets do GitHub):
 
   | Ruleset | Alvo | Regras |
   |---|---|---|
-  | `protecao-main` | `main` | Exige pull request (somente merge commit) e CI verde; bloqueia force push e exclusão |
+  | `protecao-main` | `main` | Exige pull request (somente merge commit), o check `CI concluída` verde e nenhum alerta crítico do code scanning; bloqueia force push e exclusão |
   | `protecao-epics` | `epic/**` | Bloqueia force push e exclusão; **não** exige pull request, para permitir a sincronização direta com a `main` |
 
 - A regra "exigir histórico linear" fica desligada em ambos, porque é incompatível com merge commit.

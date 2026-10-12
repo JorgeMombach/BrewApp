@@ -18,13 +18,13 @@ Com JPA, o modelo de objetos manda no banco, o SQL é gerado em tempo de execuç
 1. **Flyway aplica as migrations, e o jOOQ gera as classes a partir do banco migrado.** O SQL é escrito de forma explícita e tipada, e uma mudança no schema que quebre uma consulta quebra a compilação.
 2. **O código gerado é versionado.** Ele fica numa pasta própria do backend, marcada como gerada para o GitHub colapsá-la no diff. O projeto compila logo após o clone, sem Docker, e a pull request mostra o impacto de cada migration.
 3. **A geração fica fora do build padrão.** Ela roda num profile do Maven, acionado por quem muda uma migration. O profile sobe um PostgreSQL descartável com Testcontainers, com as mesmas roles do ambiente local, aplica as migrations com o Flyway e gera as classes.
-4. **Uma checagem de divergência garante que o código versionado bate com as migrations.** Ela regenera o código e falha se houver qualquer diferença. Até a entrega da pipeline de CI (BREW-20), a checagem é um passo local antes de abrir a pull request; depois, vira um job da CI.
+4. **Uma checagem de divergência garante que o código versionado bate com as migrations.** Ela regenera o código e falha se houver qualquer diferença. É um job da CI desde a BREW-20; antes disso, era um passo local antes de abrir a pull request.
 5. **As classes de cada schema são geradas dentro da camada de persistência do próprio módulo.** Assim, a verificação de fronteiras do Spring Modulith impede que um módulo use as tabelas de outro, e uma regra de arquitetura impede que os tipos do jOOQ saiam da camada de persistência.
 6. **Migrations por módulo, versionadas por data e hora.** Cada módulo tem a sua pasta, e a versão segue o formato `V<AAAAMMDD>_<HHMM>__descricao.sql`. Duas migrations nunca têm a mesma data e hora, mesmo em pastas diferentes. Migration aplicada nunca é editada: a correção é sempre uma migration nova.
 7. **Um histórico único do Flyway,** num schema próprio. Os schemas dos módulos são criados pelas próprias migrations.
 8. **Duas roles no banco.** A role de migração é dona dos schemas e das tabelas e só é usada pelo Flyway. A role da aplicação lê, insere e altera dados por privilégios padrão de cada schema, mas não cria nem altera estruturas. A exclusão de linhas é concedida tabela a tabela, porque exclusão física é exceção no modelo de dados. Isso é pré-requisito do Row Level Security, que não se aplica ao dono da tabela.
 
-### Como regenerar e checar a divergência
+### Como regenerar e checar a divergência localmente
 
 A partir da pasta do backend, com o Docker rodando:
 
@@ -47,7 +47,7 @@ A segunda linha não pode imprimir nada. Se imprimir, o código gerado não acom
 **Negativas**
 
 - Mais código para escrever do que com repositórios do Spring Data: as conversões entre records do jOOQ e o domínio são feitas à mão no adapter de persistência.
-- Quem muda uma migration precisa lembrar de regenerar o código. A checagem de divergência cobre o esquecimento, mas só passa a ser automática com a CI.
+- Quem muda uma migration precisa lembrar de regenerar o código. A checagem de divergência da CI cobre o esquecimento, mas só depois do push.
 - A configuração do Flyway existe em dois lugares (na aplicação e no profile de geração) e precisa ser mantida igual. A imagem do PostgreSQL também aparece no docker-compose, nos testes e no profile.
 - A geração precisa de Docker.
 

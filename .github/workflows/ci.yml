@@ -1,0 +1,205 @@
+# CI do monorepo: um job por área, ligado por filtro de caminho.
+# O único check obrigatório no ruleset é o "ci-concluida": ele sempre roda e falha se algum job falhou.
+# Assim, um job pulado pelo filtro não deixa o check obrigatório pendente para sempre.
+# Nova área (web, contrato da API, traduções): um filtro em "mudancas", um job e uma entrada no "needs" do "ci-concluida".
+name: CI
+
+on:
+  pull_request:
+    branches: [main, 'epic/**']
+  push:
+    branches: [main, 'epic/**']
+
+permissions:
+  contents: read
+
+# Um push novo na mesma branch ou PR cancela a execução anterior
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mudancas:
+    name: Detectar áreas alteradas
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      backend: ${{ steps.filtro.outputs.backend }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filtro
+        with:
+          # No push, compara com o último commit antes do push; na pull request, com a branch de destino
+          base: ${{ github.ref_name }}
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'infra/postgres/**'
+              - '.github/workflows/ci.yml'
+
+  backend:
+    name: Backend (build, testes e arquitetura)
+    needs: mudancas
+    if: needs.mudancas.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      # verify roda os testes (Testcontainers usa o Docker do runner), a verificação do Spring Modulith e o ArchUnit
+      - run: ./mvnw --batch-mode --no-transfer-progress verify
+
+  formatacao-backend:
+    name: Formatação do backend (só arquivos alterados)
+    needs: mudancas
+    # Só na pull request: no push, o código já passou pela PR ou veio da main
+    if: github.event_name == 'pull_request' && needs.mudancas.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Histórico completo para o Spotless comparar com a branch de destino
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Conferir a formatação (corrigir local com ./mvnw spotless:apply)
+        env:
+          BRANCH_DE_DESTINO: ${{ github.base_ref }}
+        run: ./mvnw --batch-mode --no-transfer-progress spotless:check "-Dformatacao.base=origin/$BRANCH_DE_DESTINO"
+
+  jooq-divergencia:
+    name: Código do jOOQ igual ao das migrations
+    needs: mudancas
+    if: needs.mudancas.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Regenerar o código a partir das migrations
+        run: ./mvnw --batch-mode --no-transfer-progress -Pjooq-codegen generate-sources
+      - name: Falhar se o código regenerado diferir do commitado
+        run: |
+          divergencias=$(git status --porcelain -- src/main/generated)
+          if [ -n "$divergencias" ]; then
+            echo "::error::O código gerado pelo jOOQ não acompanha as migrations. Rode './mvnw -Pjooq-codegen generate-sources' e commite o resultado (ADR 0002)."
+            echo "$divergencias"
+            git --no-pager diff --stat -- src/main/generated
+            exit 1
+          fi
+
+  # Segurança roda sempre, sem filtro de caminho: segredo ou dependência vulnerável pode entrar por qualquer pasta
+  segredos:
+    name: Segredos no histórico (gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSAO: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Histórico completo: um segredo commitado e removido depois continua exposto no Git
+          fetch-depth: 0
+          persist-credentials: false
+      # Mesmo binário e mesmo .gitleaks.toml do hook de pre-commit; o checksum garante que o download não foi trocado
+      - name: Instalar o gitleaks
+        run: |
+          pacote="gitleaks_${GITLEAKS_VERSAO}_linux_x64.tar.gz"
+          curl --fail --silent --show-error --location --output "$pacote" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSAO}/${pacote}"
+          echo "${GITLEAKS_SHA256}  ${pacote}" | sha256sum --check
+          tar -xzf "$pacote" gitleaks
+      - name: Varrer o histórico
+        run: ./gitleaks git --redact --no-banner --verbose .
+
+  vulnerabilidades:
+    name: Dependências vulneráveis (Trivy)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Relatório completo (HIGH e CRITICAL, inclusive sem correção) na aba Security do GitHub; não quebra o build
+      - name: Gerar relatório para a aba Security
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: sarif
+          output: trivy.sarif
+          exit-code: '0'
+      - name: Publicar o relatório
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+      # Quebra o build em CRITICAL com correção disponível; sem correção, fica só no relatório até sair a versão nova
+      - name: Falhar em vulnerabilidade crítica
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
+          skip-setup-trivy: true
+
+  ci-concluida:
+    name: CI concluída
+    needs: [mudancas, backend, formatacao-backend, jooq-divergencia, segredos, vulnerabilidades]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      # Job pulado pelo filtro conta como sucesso; falha ou cancelamento quebra o check
+      - name: Conferir o resultado dos jobs
+        env:
+          RESULTADOS_DOS_JOBS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTADOS_DOS_JOBS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          if echo "$RESULTADOS_DOS_JOBS" | jq -e 'to_entries | any(.value.result == "failure" or .value.result == "cancelled")' > /dev/null; then
+            echo "::error::Algum job da CI falhou ou foi cancelado."
+            exit 1
+          fi

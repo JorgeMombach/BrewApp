@@ -79,6 +79,11 @@ Concluída a epic, ela é mergeada na `main` (primeira entrega na `main`), com o
 | 10/10 | Sprint ampliado com o restante da epic BREW-5, em vez de encerrado antes do prazo (ver "Ampliação em 10/10"). |
 | 10/10 | BREW-22 reduzida de 3 para 2 pontos: os ADRs 0002 e 0014 foram escritos durante as histórias BREW-15 e BREW-16. |
 | 10/10 | Jobs de CI de front saem da BREW-20 e entram nas histórias que criam cada parte (BREW-17 app web, BREW-18 contrato da API, BREW-19 traduções). A BREW-20 entrega backend, segurança e a checagem do jOOQ, sem ficar bloqueada pelo front. |
+| 12/10 | CI (BREW-20) num único workflow com um job por área do monorepo, acionado por filtro de caminho, e um job final `CI concluída` como único check obrigatório do ruleset. Workflows separados por área deixariam o check obrigatório pendente quando a área não muda. A spec (seção 10) foi ajustada. CodeQL em workflow próprio, bloqueando pela regra de code scanning do ruleset. |
+| 12/10 | Formatação com Spotless e Palantir Java Format (4 espaços, igual ao `.editorconfig`), só nos arquivos alterados. O build local formata sozinho; a CI só verifica, na pull request. A CI não corrige nem commita por conta própria. |
+| 12/10 | Trivy só nas dependências (`pom.xml` e `pnpm-lock.yaml`), quebrando em vulnerabilidade crítica que já tem correção; as sem correção ficam no relatório da aba Security. Varredura de imagem (spec 9.6) entra quando existir a imagem do backend, junto com o CD. |
+| 12/10 | Pull requests do Dependabot vão direto para a `main`, como hotfix de manutenção, seguidas da sincronização na epic. Imagens do docker-compose ficam fora do Dependabot enquanto a imagem do PostgreSQL estiver repetida em três lugares (ADR 0002). |
+| 12/10 | Fim da exceção de 03/10 à Definition of Done: a partir do merge da BREW-20 na epic, história pronta exige CI verde. A checagem de divergência do jOOQ passa de passo local a job da CI. |
 
 ## Resultado (preencher na retro)
 
