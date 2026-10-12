@@ -378,7 +378,7 @@ Um documento curto de modelo de ameaças listará os ativos (receitas, dados pes
 
 - Todo código que depende do tempo recebe o relógio por injeção, o que mantém os testes determinísticos.
 - Meta de cobertura alta **no domínio e nos casos de uso**, sem meta global de vaidade. Mutation testing no domínio como medida adicional da qualidade dos testes.
-- Pipelines de CI separados por área do monorepo.
+- Pipelines de CI separados por área do monorepo: um job por área, acionado por filtro de caminho, num workflow com um único check obrigatório.
 - Formatação automática aplicada **apenas nos arquivos alterados**.
 
 ---

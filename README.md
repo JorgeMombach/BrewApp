@@ -112,6 +112,23 @@ Na pasta `backend/`, com o Docker rodando:
 
 Os testes de persistência usam um PostgreSQL real em container (Testcontainers), e não um banco em memória. Por isso o Docker precisa estar ativo. Os testes não dependem do `.env` nem do ambiente do `infra/`.
 
+### 6. Formatação do código Java
+
+O backend segue o Palantir Java Format, aplicado pelo Spotless só nos arquivos alterados. Arquivos que ninguém mexeu continuam como estão. Não é preciso rodar nada à parte:
+
+- **Pelo Maven:** todo build (`compile`, `test`, `verify`) formata os arquivos alterados desde o último commit.
+- **Pelo IntelliJ IDEA:** instale o plugin palantir-java-format, habilite-o nas configurações e, em Tools → Actions on Save, marque "Reformat code" e "Optimize imports" para arquivos Java. Assim o arquivo é formatado ao ser salvo.
+
+Na pull request, a CI confere a formatação dos arquivos alterados em relação à branch de destino. Se ela reclamar de algo que já foi commitado, formate a partir da pasta `backend/`, informando a branch de destino, e commite o resultado:
+
+```bash
+./mvnw spotless:apply -Dformatacao.base=origin/epic/BREW-5
+```
+
+## Integração contínua
+
+Toda pull request e todo push para a `main` e para as branches de epic passam pelo GitHub Actions: build e testes do backend, regras de arquitetura, formatação, conferência do código gerado pelo jOOQ, varredura de segredos, dependências vulneráveis e análise estática com o CodeQL. O merge na `main` só é liberado com tudo verde. O Dependabot propõe as atualizações de dependências toda semana. Os detalhes estão no [fluxo de branches](docs/processo/fluxo-de-branches.md).
+
 ## Documentação
 
 - [Spec do MVP](docs/specs/2026-10-03-mvp-diario-adega-design.md): domínio, arquitetura, dados, offline, segurança e testes

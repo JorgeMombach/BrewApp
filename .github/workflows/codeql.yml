@@ -1,0 +1,51 @@
+# Análise estática de segurança (spec 9.6). Os alertas vão para a aba Security do GitHub.
+# Quem bloqueia o merge é a regra "Require code scanning results" do ruleset protecao-main, não este workflow.
+# JavaScript/TypeScript entra na matriz junto com o app web (BREW-17).
+name: CodeQL
+
+on:
+  pull_request:
+    branches: [main, 'epic/**']
+  push:
+    branches: [main, 'epic/**']
+  # Semanal: regras novas do CodeQL também encontram problemas em código que não mudou
+  schedule:
+    - cron: '0 9 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analise:
+    name: CodeQL (${{ matrix.linguagem }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # build-mode none: analisa o código-fonte sem compilar, então não precisa de Docker nem do build do Maven
+          - linguagem: java-kotlin
+            modo-de-build: none
+          # Os próprios workflows: injeção de comando, permissões amplas demais
+          - linguagem: actions
+            modo-de-build: none
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: ${{ matrix.linguagem }}
+          build-mode: ${{ matrix.modo-de-build }}
+          queries: security-extended
+      - uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:${{ matrix.linguagem }}

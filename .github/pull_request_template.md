@@ -20,11 +20,11 @@
 ### Gerais
 
 - [ ] Critérios de aceite conferidos um a um com o Jira
-- [ ] Build completo passando (testes, fronteiras entre módulos e regras de arquitetura)
+- [ ] Build completo passando (testes, fronteiras entre módulos e regras de arquitetura): CI verde
 - [ ] Checagem de regressão descrita acima
 - [ ] Nenhum dado pessoal ou token nos logs
 - [ ] Nada sensível nos commits; varredura de segredos não contornada
-- [ ] Formatação só nos arquivos alterados
+- [ ] Formatação só nos arquivos alterados (verificada pela CI)
 - [ ] Documentação e Jira atualizados quando a decisão mudou
 - [ ] Horas registradas com `#time` nos commits
 
@@ -44,7 +44,7 @@
 ### Migrations e índices
 
 - [ ] Mudança de banco em migration nova; nenhuma migration já mergeada foi editada
-- [ ] Código do jOOQ regenerado e commitado; checagem de divergência sem diferença
+- [ ] Código do jOOQ regenerado e commitado junto com a migration (divergência verificada pela CI)
 - [ ] Plano de execução na seção acima para índice ou consulta nova
 
 ### Endpoints

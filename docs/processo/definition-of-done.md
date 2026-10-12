@@ -12,14 +12,14 @@ Uma história está **pronta** quando é mergeada na branch da sua epic (`epic/B
 
 A chegada da epic à `main` é uma entrega de release. Ela não é condição para concluir a história no sprint.
 
-> **Exceção temporária:** enquanto a BREW-20 (pipeline de CI no GitHub Actions) não for entregue, a história é considerada pronta quando mergeada na epic, sem exigir CI verde. Nesse período, o build e os testes precisam passar localmente antes do merge. A decisão está registrada no plano do Sprint 1, em 03/10/2026.
+A CI verde cobre build, testes, regras de arquitetura, formatação dos arquivos alterados, divergência do código do jOOQ, varredura de segredos e de dependências vulneráveis. Os critérios que ela verifica sozinha estão indicados abaixo; os demais continuam sendo conferidos por quem entrega.
 
 ## Critérios gerais
 
 Valem para toda entrega.
 
 1. **Critérios de aceite conferidos um a um** com o que está no Jira. Se um critério mudou durante o trabalho, o Jira é atualizado.
-2. **Build completo passando**, incluindo os testes, a verificação das fronteiras entre módulos e as regras de arquitetura.
+2. **Build completo passando**, incluindo os testes, a verificação das fronteiras entre módulos e as regras de arquitetura. *Verificado pela CI.*
 3. **Checagem de regressão feita e descrita na pull request:**
    - quem consome o que foi alterado;
    - quais fluxos são afetados;
@@ -28,8 +28,8 @@ Valem para toda entrega.
 
    A descrição separa o que foi verificado do que ficou como suposição.
 4. **Nenhum dado pessoal ou token nos logs.** Isso inclui mensagens de exceção e valores de consultas SQL fora do ambiente de desenvolvimento.
-5. **Nada sensível nos commits.** A varredura de segredos do pre-commit não pode ser desligada ou contornada.
-6. **Formatação aplicada só nos arquivos alterados.**
+5. **Nada sensível nos commits.** A varredura de segredos do pre-commit não pode ser desligada ou contornada. *A CI repete a varredura em todo o histórico.*
+6. **Formatação aplicada só nos arquivos alterados.** O build local formata sozinho; *a CI verifica na pull request.*
 7. **Documentação acompanha a decisão.** Se a história muda algo definido na spec do MVP, no design da API ou no fluxo de branches, o documento é atualizado na mesma entrega, assim como a issue no Jira.
 8. **Horas registradas na história** pelo `#time` nos commits, no padrão definido no fluxo de branches.
 
@@ -51,7 +51,7 @@ Valem para toda entrega.
 ### Migrations e índices
 
 - Toda mudança de banco é uma migration nova. Uma migration que já foi mergeada em uma epic nunca é editada: a correção vira outra migration.
-- O código gerado pelo jOOQ é regenerado a partir das migrations e commitado junto com elas. Antes de abrir a pull request, o codegen roda de novo e não pode produzir nenhuma diferença em relação ao que está commitado. Enquanto a BREW-20 não for entregue, essa checagem é feita localmente; depois, ela passa a ser um job da CI. Os comandos estão no ADR 0002.
+- O código gerado pelo jOOQ é regenerado a partir das migrations e commitado junto com elas. *A CI regenera o código e falha* se houver qualquer diferença em relação ao que está commitado. Os comandos para regenerar localmente estão no ADR 0002.
 - Índice novo, ou consulta nova que dependa de um índice, vem com a saída de `EXPLAIN (ANALYZE, BUFFERS)` na descrição da pull request. A saída informa com quantas linhas a tabela estava, porque um plano gerado com uma tabela quase vazia não mostra se o índice está sendo usado.
 
 ### Endpoints
