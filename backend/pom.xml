@@ -131,7 +131,7 @@
     <build>
         <plugins>
             <!-- Desde o Java 23 o processamento de anotações não é mais implícito: o processador do log4j-core
-                 precisa ser declarado para registrar os plugins próprios (PoliticaDeMascaramento) -->
+                 precisa ser declarado para registrar os plugins próprios (PoliticaDeMascaramento, ConversorDeExcecaoMascarada) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

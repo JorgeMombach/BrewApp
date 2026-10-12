@@ -1,5 +1,6 @@
 package dev.brewapp.shared.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -22,8 +23,11 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -47,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@ExtendWith(OutputCaptureExtension.class)
 @Import({TratadorGlobalDeErrosTest.ControladorDeTeste.class, PostgresDeTeste.class})
 class TratadorGlobalDeErrosTest {
 
@@ -130,6 +135,16 @@ class TratadorGlobalDeErrosTest {
                 .andExpect(jsonPath("$.exception").doesNotExist())
                 .andExpect(content().string(not(containsString("segredo"))))
                 .andExpect(content().string(not(containsString("IllegalStateException"))));
+    }
+
+    /** Cenário de reprodução da BREW-69: a resposta já não vazava, mas o log registrava o SQL com o segredo. */
+    @Test
+    void erroInesperadoVaiParaOLogComOSegredoMascarado(CapturedOutput capturedOutput) throws Exception {
+        executar(get("/teste/erro-inesperado")).andExpect(status().isInternalServerError());
+
+        assertThat(capturedOutput.getOut())
+                .contains("select * from adega.evento where senha = '***'")
+                .doesNotContain("segredo");
     }
 
     private ResultActions executar(MockHttpServletRequestBuilder mockHttpServletRequestBuilder) throws Exception {

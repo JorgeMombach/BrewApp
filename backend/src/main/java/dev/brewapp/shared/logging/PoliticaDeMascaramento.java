@@ -17,7 +17,9 @@ import org.apache.logging.log4j.util.StringMap;
 /**
  * Mascara tokens, segredos e e-mails na mensagem e no MDC de todo evento, antes do layout (texto ou JSON).
  * Usada no log4j2-spring.xml como {@code <PoliticaDeMascaramento loggersComEmailVisivel="..."/>}.
- * O stack trace das exceções não passa por aqui: mensagens de exceção não podem levar dado pessoal.
+ * A exceção anexada não passa por aqui: o Throwable não pode ser reescrito sem trocar o tipo que vai para o log.
+ * Ela é mascarada já renderizada, em cada layout: ConversorDeExcecaoMascarada (texto) e MascaramentoDaExcecaoEmJson
+ * (JSON), com o e-mail mascarado mesmo nos loggers com e-mail visível.
  */
 @Plugin(name = "PoliticaDeMascaramento", category = Core.CATEGORY_NAME, elementType = "rewritePolicy", printObject = true)
 public final class PoliticaDeMascaramento implements RewritePolicy {

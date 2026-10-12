@@ -42,6 +42,10 @@ logging:
     # Identificador de correlação da requisição (FiltroDeCorrelacao) em cada linha do console.
     # %notEmpty: fora de requisição (subida, tarefas agendadas) não sobra um "[]" vazio
     correlation: "%notEmpty{[%X{correlationId}] }"
+  structured:
+    json:
+      # Mascara a mensagem e o stack trace da exceção quando o log sai em JSON (prod); no texto, é o %xwExMascarado
+      customizer: dev.brewapp.shared.logging.MascaramentoDaExcecaoEmJson
   level:
     # Logo e "dica do dia" do jOOQ na primeira consulta: ruído, principalmente no JSON de produção
     org.jooq.Constants: WARN
