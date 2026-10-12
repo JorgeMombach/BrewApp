@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Baseado no log4j2.xml padrão do Spring Boot 4.1 (spring-boot.jar, org/springframework/boot/logging/log4j2).
-    Diferença: todo evento passa pela PoliticaDeMascaramento antes do console (DoD, critério 4).
+    Diferenças (DoD, critério 4):
+    - todo evento passa pela PoliticaDeMascaramento (mensagem e MDC) antes do console;
+    - no texto, a exceção sai pelo %xwExMascarado (ConversorDeExcecaoMascarada) em vez do %xwEx.
+    Por isso logging.exception-conversion-word e logging.pattern.console não têm efeito: o padrão é fixo aqui,
+    e um padrão externo sem o %xwExMascarado escreveria a exceção sem mascaramento.
     Formato: texto com o padrão do Boot, ou JSON quando logging.structured.format.console está definido (prod: ECS).
     Sem appender de arquivo: logging.file.* não tem efeito; a saída é só o console (container).
 -->
 <Configuration status="WARN">
     <Properties>
-        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
         <Property name="LOG_LEVEL_PATTERN">%5p</Property>
         <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd'T'HH:mm:ss.SSSXXX</Property>
-        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{${sys:LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${sys:LOG_LEVEL_PATTERN}} %clr{%pid}{magenta} %clr{--- %esb{${sys:APPLICATION_NAME:-}}%esb{${sys:APPLICATION_GROUP:-}}[%15.15t] ${sys:LOG_CORRELATION_PATTERN:-}}{faint}%clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{${sys:LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${sys:LOG_LEVEL_PATTERN}} %clr{%pid}{magenta} %clr{--- %esb{${sys:APPLICATION_NAME:-}}%esb{${sys:APPLICATION_GROUP:-}}[%15.15t] ${sys:LOG_CORRELATION_PATTERN:-}}{faint}%clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n%xwExMascarado</Property>
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT" follow="true">
@@ -19,7 +22,7 @@
                     <StructuredLogLayout format="${sys:CONSOLE_LOG_STRUCTURED_FORMAT}" charset="${sys:CONSOLE_LOG_CHARSET}"/>
                 </SystemPropertyArbiter>
                 <DefaultArbiter>
-                    <PatternLayout pattern="${sys:CONSOLE_LOG_PATTERN}" charset="${sys:CONSOLE_LOG_CHARSET}"/>
+                    <PatternLayout pattern="${CONSOLE_LOG_PATTERN}" charset="${sys:CONSOLE_LOG_CHARSET}"/>
                 </DefaultArbiter>
             </Select>
             <Filters>

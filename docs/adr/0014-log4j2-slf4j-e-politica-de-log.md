@@ -2,7 +2,7 @@
 
 - **Status:** aceito
 - **Data:** 07/10/2026
-- **História:** BREW-16
+- **História:** BREW-16; revisado na BREW-69 (12/10/2026), que estendeu o mascaramento às exceções
 - **Referências:** spec do MVP, seção 7; design da API, seções 1.2 e 1.6; Definition of Done, critério geral 4
 
 ## Contexto
@@ -20,7 +20,7 @@ O Spring Boot usa o Logback por padrão. A escolha da implementação de log é 
 3. **O driver do PostgreSQL não inclui o detalhe do erro nas exceções em produção.** É no detalhe que o banco coloca os valores dos registros, como o e-mail que violou uma chave única.
 4. **Produção loga em JSON no formato Elastic Common Schema.** O formato é suportado nativamente pelo Spring Boot e entendido pelas ferramentas de log mais comuns, sem amarrar o projeto a nenhuma delas. Em desenvolvimento, o log continua em texto.
 5. **Toda requisição tem um identificador de correlação.** Ele é aceito do cliente, no cabeçalho `X-Correlation-Id`, desde que siga um formato restrito; fora disso, ou quando não vem, o servidor gera um. O identificador é definido antes da camada de segurança, entra em toda linha de log da requisição e volta na resposta, no cabeçalho e no corpo dos erros. O formato restrito existe porque o valor vem de fora e vai para o log.
-6. **Todo evento de log passa por um mascaramento antes de ser escrito.** Tokens, credenciais e segredos são sempre ocultados, e e-mails ficam só com a primeira letra e o domínio. A única exceção é o SQL registrado em desenvolvimento, que mantém o e-mail para continuar executável, mas ainda oculta os tokens.
+6. **Todo evento de log passa por um mascaramento antes de ser escrito.** Tokens, credenciais e segredos são sempre ocultados, e e-mails ficam só com a primeira letra e o domínio. A única exceção é o SQL registrado em desenvolvimento, que mantém o e-mail para continuar executável, mas ainda oculta os tokens. As exceções anexadas ao log passam pelas mesmas regras: a mensagem, as causas encadeadas e o stack trace são mascarados depois de escritos como texto, no formato texto e no JSON. Nelas, o e-mail é mascarado em todos os ambientes, porque mensagens de bibliotecas trazem valores (o PostgreSQL inclui o e-mail que violou uma chave única; o jOOQ inclui o SQL) e o motivo da exceção do SQL de desenvolvimento não vale para elas.
 
 ## Consequências
 
@@ -34,7 +34,11 @@ O Spring Boot usa o Logback por padrão. A escolha da implementação de log é 
 
 **Negativas**
 
-- O mascaramento é a segunda linha de defesa, não a primeira. Ele não alcança o stack trace das exceções e não reconhece dados pessoais em texto livre, como nomes. A regra continua sendo não colocar dado pessoal em mensagens de log nem de exceção.
+- O mascaramento é a segunda linha de defesa, não a primeira. Ele não reconhece dados pessoais em texto livre, como nomes, e, num valor entre aspas, só oculta a primeira palavra. A regra continua sendo não colocar dado pessoal em mensagens de log nem de exceção.
+- O padrão do log em texto fica fixo no arquivo de configuração do Log4j2. As propriedades do Spring Boot que trocam o padrão do console ou a forma de escrever exceções deixam de ter efeito, porque um padrão vindo de fora escreveria a exceção sem mascaramento.
+- O mascaramento da exceção no texto se apoia numa classe pública do Spring Boot que não faz parte da sua API documentada. Uma mudança nela aparece como erro de compilação ao atualizar o Spring Boot.
+- No JSON, o mascaramento da exceção conhece os nomes de campo do Elastic Common Schema. Trocar o formato estruturado (por exemplo, para Logstash ou GELF) exige revisá-lo; os testes de log em produção travam o formato atual.
+- Cada evento com exceção tem o stack trace inteiro varrido pelas regras de mascaramento. O custo só aparece em eventos de erro, que são raros.
 - Ocultar o detalhe dos erros do PostgreSQL deixa a mensagem principal intacta, e algumas mensagens principais também trazem o valor recebido (por exemplo, um texto inválido para um campo numérico).
 - Valores escritos diretamente no texto do SQL (inline), em vez de passados como parâmetros, aparecem no log de consultas lentas. Dados do usuário nunca devem ser escritos dessa forma.
 - O projeto mantém um arquivo de configuração do Log4j2 próprio, derivado do padrão do Spring Boot, que precisa ser revisto quando o Spring Boot mudar o dele.
@@ -45,5 +49,6 @@ O Spring Boot usa o Logback por padrão. A escolha da implementação de log é 
 
 - **Manter o Logback, que é o padrão do Spring Boot:** funcionaria, mas a spec já tinha definido o Log4j2, e a fachada SLF4J deixa essa escolha reversível.
 - **Mascarar com substituição de texto direto no padrão do log:** só vale para o formato texto. O JSON de produção não passa pelo padrão, então o mascaramento ficaria justamente onde menos importa.
+- **Mascarar a exceção na mesma etapa da mensagem, trocando-a por uma cópia com o texto mascarado (BREW-69):** cobriria texto e JSON num lugar só, mas a cópia teria outro tipo, e o JSON de produção passaria a registrar o tipo da cópia no lugar do erro real, perdendo o agrupamento por tipo de erro. Mascarar a exceção já escrita, em cada formato, preserva o tipo.
 - **Proxy de log do driver JDBC (como datasource-proxy ou P6Spy) para o SQL:** adicionaria uma dependência para algo que o jOOQ já oferece com listeners.
 - **Rastreamento distribuído (Micrometer Tracing) no lugar do identificador próprio:** resolve um problema maior que o atual, de um único serviço. Pode ser adotado quando houver a primeira extração de serviço. Nesse momento, o identificador de correlação pode virar um atributo do rastro.

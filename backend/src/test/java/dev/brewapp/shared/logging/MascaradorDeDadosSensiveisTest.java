@@ -30,6 +30,18 @@ class MascaradorDeDadosSensiveisTest {
         assertThat(MascaradorDeDadosSensiveis.mascarar(texto, true)).isEqualTo(esperado);
     }
 
+    /** Aspas simples como delimitador do texto, por isso o quoteCharacter trocado. */
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', quoteCharacter = '"', textBlock = """
+            senha = 'segredo'                                    | senha = '***'
+            select * from adega.evento where senha = 'segredo'   | select * from adega.evento where senha = '***'
+            password='abc', token='def'                          | password='***', token='***'
+            {'client_secret': 'abc', 'nome': 'x'}                | {'client_secret': '***', 'nome': 'x'}
+            """)
+    void mascaraSegredoEntreAspasSimples(String texto, String esperado) {
+        assertThat(MascaradorDeDadosSensiveis.mascarar(texto, true)).isEqualTo(esperado);
+    }
+
     @Test
     void jwtSoltoEhMascarado() {
         assertThat(JWT).startsWith("eyJ");

@@ -64,6 +64,19 @@ class LogDeSqlEmDesenvolvimentoTest {
                 .doesNotContain("abc.def");
     }
 
+    /** BREW-69: o e-mail visível no dev vale só para a mensagem com o SQL; na exceção, é mascarado em todo ambiente. */
+    @Test
+    void noLoggerDoJooqOEmailDaExcecaoEhMascarado(CapturedOutput capturedOutput) {
+        RuntimeException runtimeException = new RuntimeException("Key (email)=(fulano@exemplo.com) already exists");
+
+        LoggerFactory.getLogger("org.jooq.tools.LoggerListener").warn("select 'fulano@exemplo.com'", runtimeException);
+
+        assertThat(capturedOutput.getOut())
+                .contains("select 'fulano@exemplo.com'")
+                .contains("Key (email)=(f***@exemplo.com) already exists")
+                .doesNotContain("Key (email)=(fulano@exemplo.com)");
+    }
+
     @Test
     void foraDoJooqOEmailEhMascaradoTambemNoDev(CapturedOutput capturedOutput) {
         LoggerFactory.getLogger(LogDeSqlEmDesenvolvimentoTest.class).info("usuário fulano@exemplo.com");

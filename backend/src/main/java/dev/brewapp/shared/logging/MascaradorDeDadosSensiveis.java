@@ -4,7 +4,8 @@ import java.util.regex.Pattern;
 
 /**
  * Regras de mascaramento dos logs (DoD, critério 4: nenhum dado pessoal ou token nos logs). Java puro, sem Log4j2,
- * para ser testado isoladamente; a PoliticaDeMascaramento aplica estas regras a cada evento de log.
+ * para ser testado isoladamente. Aplicadas à mensagem e ao MDC pela PoliticaDeMascaramento e à exceção pelo
+ * ConversorDeExcecaoMascarada (texto) e pelo MascaramentoDaExcecaoEmJson (JSON).
  * É a segunda linha de defesa: a primeira é não colocar token nem dado pessoal em mensagem de log.
  */
 final class MascaradorDeDadosSensiveis {
@@ -19,10 +20,13 @@ final class MascaradorDeDadosSensiveis {
     private static final Pattern JWT =
             Pattern.compile("\\beyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*");
 
-    /** Pares chave/valor de segredos, em texto (senha=x), JSON ("password": "x") ou query string (&token=x). */
+    /**
+     * Pares chave/valor de segredos, em texto (senha=x), JSON ("password": "x"), SQL (senha = 'x') ou query string
+     * (&token=x). Entre aspas, só a primeira palavra do valor é mascarada.
+     */
     private static final Pattern SEGREDO_EM_CHAVE_E_VALOR = Pattern.compile(
             "(?i)\\b(password|senha|secret|client_secret|access_token|refresh_token|id_token|token|api[_-]?key)"
-                    + "(\"?\\s*[:=]\\s*\"?)([^\\s\"',;&}]+)");
+                    + "([\"']?\\s*[:=]\\s*[\"']?)([^\\s\"',;&}]+)");
 
     /** Mantém a primeira letra e o domínio: fulano@exemplo.com -> f***@exemplo.com, ainda útil para diagnóstico. */
     private static final Pattern EMAIL =

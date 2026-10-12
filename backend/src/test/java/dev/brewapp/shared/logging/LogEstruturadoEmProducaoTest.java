@@ -41,10 +41,7 @@ class LogEstruturadoEmProducaoTest {
 
         LOGGER.info("Lote criado por fulano@exemplo.com");
 
-        String linhaDoEvento = capturedOutput.getOut().lines()
-                .filter(linha -> linha.contains("Lote criado por"))
-                .findFirst()
-                .orElseThrow();
+        String linhaDoEvento = linhaQueContem(capturedOutput, "Lote criado por");
         assertThat(linhaDoEvento)
                 .startsWith("{")
                 .endsWith("}")
@@ -53,5 +50,46 @@ class LogEstruturadoEmProducaoTest {
                 .contains("\"correlationId\":\"rastro-json\"")
                 .contains("\"service\":{\"name\":\"brewapp\"")
                 .doesNotContain("fulano@exemplo.com");
+    }
+
+    /** O tipo continua o da exceção original: a máscara age só na mensagem e no stack trace (MascaramentoDaExcecaoEmJson). */
+    @Test
+    void excecaoComSegredoSaiMascaradaNoErrorDoEcs(CapturedOutput capturedOutput) {
+        LOGGER.error("Erro inesperado", new IllegalStateException("select * from adega.evento where senha = 'segredo'"));
+
+        assertThat(linhaQueContem(capturedOutput, "Erro inesperado"))
+                .startsWith("{")
+                .contains("\"error\":{\"type\":\"java.lang.IllegalStateException\"")
+                .contains("\"message\":\"select * from adega.evento where senha = '***'\"")
+                .contains("\"stack_trace\":\"java.lang.IllegalStateException: select * from adega.evento where senha = '***'")
+                .doesNotContain("segredo");
+    }
+
+    @Test
+    void excecaoComEmailSaiMascaradaNoErrorDoEcs(CapturedOutput capturedOutput) {
+        LOGGER.error("Falha no cadastro", new IllegalStateException("Key (email)=(fulano@exemplo.com) already exists"));
+
+        assertThat(linhaQueContem(capturedOutput, "Falha no cadastro"))
+                .contains("\"message\":\"Key (email)=(f***@exemplo.com) already exists\"")
+                .doesNotContain("fulano@exemplo.com");
+    }
+
+    @Test
+    void causaEncadeadaComDadoSensivelSaiMascaradaNoStackTrace(CapturedOutput capturedOutput) {
+        IllegalArgumentException causa = new IllegalArgumentException("usuário fulano@exemplo.com com senha=abc");
+
+        LOGGER.error("Falha ao salvar", new RuntimeException("Erro no repositório", causa));
+
+        assertThat(linhaQueContem(capturedOutput, "Falha ao salvar"))
+                .contains("Caused by: java.lang.IllegalArgumentException: usuário f***@exemplo.com com senha=***")
+                .doesNotContain("fulano@exemplo.com")
+                .doesNotContain("senha=abc");
+    }
+
+    private static String linhaQueContem(CapturedOutput capturedOutput, String trecho) {
+        return capturedOutput.getOut().lines()
+                .filter(linha -> linha.contains(trecho))
+                .findFirst()
+                .orElseThrow();
     }
 }
