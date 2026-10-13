@@ -18,20 +18,20 @@ import org.springframework.http.ProblemDetail;
 public final class Problemas {
 
     private static final String BASE_DO_TIPO = "https://brewapp.dev/erros/";
-    private static final String PROPRIEDADE_CODE = "code";
-    private static final String PROPRIEDADE_PARAMS = "params";
-    private static final String PROPRIEDADE_CORRELATION_ID = "correlationId";
-    private static final String PROPRIEDADE_ERRORS = "errors";
-    private static final String PROPRIEDADE_CAMPO = "campo";
+    static final String PROPRIEDADE_CODE = "code";
+    static final String PROPRIEDADE_PARAMS = "params";
+    static final String PROPRIEDADE_CORRELATION_ID = "correlationId";
+    static final String PROPRIEDADE_ERRORS = "errors";
+    static final String PROPRIEDADE_CAMPO = "campo";
 
-    private Problemas() {
-    }
+    private Problemas() {}
 
     public static ProblemDetail criar(HttpStatusCode httpStatusCode, ErroGenerico erroGenerico) {
         return criar(httpStatusCode, erroGenerico.name(), erroGenerico.titulo(), Map.of());
     }
 
-    public static ProblemDetail criar(HttpStatusCode httpStatusCode, CodigoDeErro codigoDeErro, Map<String, Object> params) {
+    public static ProblemDetail criar(
+            HttpStatusCode httpStatusCode, CodigoDeErro codigoDeErro, Map<String, Object> params) {
         return criar(httpStatusCode, codigoDeErro.name(), codigoDeErro.titulo(), params);
     }
 
@@ -54,10 +54,12 @@ public final class Problemas {
         return erroDeValidacao;
     }
 
-    private static ProblemDetail criar(HttpStatusCode httpStatusCode, String code, String title, Map<String, Object> params) {
+    private static ProblemDetail criar(
+            HttpStatusCode httpStatusCode, String code, String title, Map<String, Object> params) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(httpStatusCode);
         // LOTE_ENVASADO -> https://brewapp.dev/erros/lote-envasado
-        problemDetail.setType(URI.create(BASE_DO_TIPO + code.toLowerCase(Locale.ROOT).replace('_', '-')));
+        problemDetail.setType(
+                URI.create(BASE_DO_TIPO + code.toLowerCase(Locale.ROOT).replace('_', '-')));
         problemDetail.setTitle(title);
         problemDetail.setProperty(PROPRIEDADE_CODE, code);
         problemDetail.setProperty(PROPRIEDADE_PARAMS, params);

@@ -1,6 +1,5 @@
 # Análise estática de segurança (spec 9.6). Os alertas vão para a aba Security do GitHub.
 # Quem bloqueia o merge é a regra "Require code scanning results" do ruleset protecao-main, não este workflow.
-# JavaScript/TypeScript entra na matriz junto com o app web (BREW-17).
 name: CodeQL
 
 on:
@@ -15,9 +14,11 @@ on:
 permissions:
   contents: read
 
+# Cancela a análise anterior só na mesma PR. No push para main e epic/** não cancela: a regra de code scanning
+# do ruleset exige o resultado de cada commit da branch
 concurrency:
   group: codeql-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   analise:
@@ -33,6 +34,9 @@ jobs:
         include:
           # build-mode none: analisa o código-fonte sem compilar, então não precisa de Docker nem do build do Maven
           - linguagem: java-kotlin
+            modo-de-build: none
+          # packages/shared e, a partir da BREW-17, apps/web
+          - linguagem: javascript-typescript
             modo-de-build: none
           # Os próprios workflows: injeção de comando, permissões amplas demais
           - linguagem: actions

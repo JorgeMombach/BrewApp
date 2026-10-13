@@ -21,6 +21,7 @@
         <java.version>25</java.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <archunit.version>1.5.1</archunit.version>
+        <springdoc.version>3.1.1</springdoc.version>
         <gmavenplus-plugin.version>4.2.0</gmavenplus-plugin.version>
         <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>
         <palantir-java-format.version>2.102.0</palantir-java-format.version>
@@ -78,6 +79,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
         </dependency>
+        <!-- Contrato OpenAPI gerado a partir dos controllers (spec 4.5). Rotas desligadas por padrão:
+             o perfil dev liga o documento e o Swagger UI; os testes ligam só o documento, para exportá-lo -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
         <!-- Persistência schema-first (spec 5.1): Flyway aplica as migrations, jOOQ consulta -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -133,6 +141,17 @@
     </dependencies>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <!-- Casos de teste compartilhados com o TypeScript (spec 4.5): as duas implementações das conversões
+                 são testadas contra os mesmos arquivos, lidos pelo classpath em /casos-de-teste -->
+            <testResource>
+                <directory>../packages/shared/casos-de-teste</directory>
+                <targetPath>casos-de-teste</targetPath>
+            </testResource>
+        </testResources>
         <plugins>
             <!-- Desde o Java 23 o processamento de anotações não é mais implícito: o processador do log4j-core
                  precisa ser declarado para registrar os plugins próprios (PoliticaDeMascaramento, ConversorDeExcecaoMascarada) -->

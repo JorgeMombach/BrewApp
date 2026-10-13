@@ -5,6 +5,8 @@
 
 Este documento desenha a API **antes** do código. Depois, o OpenAPI gerado pelo backend (Swagger) precisa corresponder ao que está descrito aqui. Quando os dois divergirem, ou o código está errado, ou este documento precisa ser atualizado de forma consciente.
 
+O documento gerado fica versionado em `packages/shared/openapi/openapi.json`, e os tipos TypeScript dos clientes saem dele (ADR 0013). Em desenvolvimento, ele pode ser navegado no Swagger UI (`/swagger-ui.html`, só no perfil `dev`).
+
 Ordem de desenho:
 
 1. Convenções gerais
@@ -94,6 +96,7 @@ Todos os erros seguem o formato **Problem Details (RFC 9457)**, estendido com um
 - `correlationId` é o mesmo valor do cabeçalho `X-Correlation-Id` da resposta. Vem em todo erro, inclusive nos 401 e 403 da camada de segurança, para que o usuário possa informá-lo ao relatar um problema.
 - Em erros de validação, `errors` lista cada campo com problema: `{ "campo": "capacidade.valor", "code": "DEVE_SER_POSITIVO", "params": {} }`.
 - Nenhuma resposta de erro contém stack trace, nome de classe, SQL ou detalhe interno.
+- No OpenAPI, este formato é o schema `ProblemDetails` (com `ErroDeValidacao` como item de `errors`), e as respostas de erro dos endpoints o referenciam.
 
 **Códigos HTTP:**
 

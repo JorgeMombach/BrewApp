@@ -57,6 +57,21 @@ management:
         # /actuator/health é a única rota pública (spec 9.2)
         include: health
 
+springdoc:
+  # Documento OpenAPI (/v3/api-docs) e Swagger UI só no perfil dev (spec 4.5); em produção as rotas não existem
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+  # Ordem estável das chaves: o documento exportado para packages/shared não muda sem mudança de contrato
+  writer-with-order-by-keys: true
+  # Sem isso, toda operação ganharia as respostas do TratadorGlobalDeErros com o ProblemDetail do Spring,
+  # que não tem code, params nem correlationId; os erros usam o schema ProblemDetails (ConfiguracaoDoContratoDaApi)
+  override-with-generic-response: false
+  # Mantém os schemas que nenhuma operação referencia ainda (ex.: ProblemDetails antes dos primeiros endpoints):
+  # eles fazem parte do contrato e geram tipos no packages/shared
+  remove-broken-reference-definitions: false
+
 brewapp:
   cors:
     # Origens separadas por vírgula (spec 9.5)
