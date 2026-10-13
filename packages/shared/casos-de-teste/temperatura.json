@@ -1,0 +1,17 @@
+{
+  "grandeza": "TEMPERATURA",
+  "referencia": "Definição da escala Fahrenheit (NIST SP 811, 2008, apêndice B.8): t/°C = (t/°F − 32)/1,8. Conversão exata; a tolerância cobre só o arredondamento do ponto flutuante.",
+  "casos": [
+    { "descricao": "fusão do gelo", "de": { "valor": 32, "unidade": "FAHRENHEIT" }, "para": "CELSIUS", "esperado": 0, "tolerancia": 1e-9 },
+    { "descricao": "ebulição da água", "de": { "valor": 212, "unidade": "FAHRENHEIT" }, "para": "CELSIUS", "esperado": 100, "tolerancia": 1e-9 },
+    { "descricao": "fermentação de ale", "de": { "valor": 64.4, "unidade": "FAHRENHEIT" }, "para": "CELSIUS", "esperado": 18, "tolerancia": 1e-9 },
+    { "descricao": "fermentação de lager", "de": { "valor": 50, "unidade": "FAHRENHEIT" }, "para": "CELSIUS", "esperado": 10, "tolerancia": 1e-9 },
+    { "descricao": "cold crash", "de": { "valor": 35.6, "unidade": "FAHRENHEIT" }, "para": "CELSIUS", "esperado": 2, "tolerancia": 1e-9 },
+    { "descricao": "abaixo de zero", "de": { "valor": -4, "unidade": "FAHRENHEIT" }, "para": "CELSIUS", "esperado": -20, "tolerancia": 1e-9 },
+    { "descricao": "fusão do gelo", "de": { "valor": 0, "unidade": "CELSIUS" }, "para": "FAHRENHEIT", "esperado": 32, "tolerancia": 1e-9 },
+    { "descricao": "fermentação de ale", "de": { "valor": 20, "unidade": "CELSIUS" }, "para": "FAHRENHEIT", "esperado": 68, "tolerancia": 1e-9 },
+    { "descricao": "congelamento de eisbock", "de": { "valor": -15, "unidade": "CELSIUS" }, "para": "FAHRENHEIT", "esperado": 5, "tolerancia": 1e-9 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 19.5, "unidade": "CELSIUS" }, "para": "CELSIUS", "esperado": 19.5, "tolerancia": 0 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 66.2, "unidade": "FAHRENHEIT" }, "para": "FAHRENHEIT", "esperado": 66.2, "tolerancia": 0 }
+  ]
+}

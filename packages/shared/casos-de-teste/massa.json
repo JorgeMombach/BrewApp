@@ -1,0 +1,16 @@
+{
+  "grandeza": "MASSA",
+  "referencia": "Fatores exatos do NIST SP 811 (2008), apêndice B: libra = 453,59237 g; onça avoirdupois = 1/16 libra = 28,349523125 g. A tolerância cobre só o arredondamento dos valores esperados.",
+  "casos": [
+    { "descricao": "um quilo", "de": { "valor": 1, "unidade": "KG" }, "para": "G", "esperado": 1000, "tolerancia": 1e-9 },
+    { "descricao": "uma libra", "de": { "valor": 1, "unidade": "LB" }, "para": "G", "esperado": 453.59237, "tolerancia": 1e-9 },
+    { "descricao": "dry hop de 2 libras", "de": { "valor": 2, "unidade": "LB" }, "para": "G", "esperado": 907.18474, "tolerancia": 1e-9 },
+    { "descricao": "uma onça", "de": { "valor": 1, "unidade": "OZ" }, "para": "G", "esperado": 28.349523125, "tolerancia": 1e-9 },
+    { "descricao": "dry hop de 1500 g", "de": { "valor": 1500, "unidade": "G" }, "para": "KG", "esperado": 1.5, "tolerancia": 1e-9 },
+    { "descricao": "um quilo em libras", "de": { "valor": 1000, "unidade": "G" }, "para": "LB", "esperado": 2.204622622, "tolerancia": 1e-9 },
+    { "descricao": "100 g de lúpulo em onças", "de": { "valor": 100, "unidade": "G" }, "para": "OZ", "esperado": 3.527396195, "tolerancia": 1e-9 },
+    { "descricao": "entre duas unidades não canônicas", "de": { "valor": 1, "unidade": "LB" }, "para": "OZ", "esperado": 16, "tolerancia": 1e-9 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 1500, "unidade": "G" }, "para": "G", "esperado": 1500, "tolerancia": 0 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 2, "unidade": "LB" }, "para": "LB", "esperado": 2, "tolerancia": 0 }
+  ]
+}
