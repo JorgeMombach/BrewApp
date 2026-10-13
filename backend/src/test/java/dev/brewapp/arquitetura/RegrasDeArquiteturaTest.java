@@ -18,14 +18,19 @@ class RegrasDeArquiteturaTest {
     private static final String PACOTE_DA_INFRAESTRUTURA_DE_LOG = "dev.brewapp.shared.logging..";
 
     /**
-     * Domínio é Java puro (spec 4.3). Vale também para o pacote raiz do shared (núcleo compartilhado,
-     * usado pelo domínio dos módulos); a infraestrutura do shared fica nos subpacotes.
+     * Domínio é Java puro (spec 4.3). Vale também para o núcleo compartilhado usado pelo domínio dos módulos: o
+     * pacote raiz do shared e o catálogo de unidades. A infraestrutura do shared fica nos demais subpacotes.
+     * O package-info do catálogo fica de fora: só declara a interface nomeada para o Spring Modulith.
      */
     @ArchTest
     static final ArchRule dominioNaoDependeDeFramework = noClasses()
-            .that().resideInAPackage("..domain..")
-            .or().resideInAPackage("dev.brewapp.shared")
-            .should().dependOnClassesThat().resideInAnyPackage("org.springframework..", "org.jooq..")
+            .that()
+            .resideInAnyPackage("..domain..", "dev.brewapp.shared", "dev.brewapp.shared.unidade..")
+            .and()
+            .doNotHaveSimpleName("package-info")
+            .should()
+            .dependOnClassesThat()
+            .resideInAnyPackage("org.springframework..", "org.jooq..")
             .because("o domínio e o núcleo compartilhado são Java puro, sem Spring nem jOOQ (spec 4.3)");
 
     /**
@@ -34,8 +39,11 @@ class RegrasDeArquiteturaTest {
      */
     @ArchTest
     static final ArchRule jooqSoNaPersistencia = noClasses()
-            .that().resideOutsideOfPackage(PACOTE_DE_PERSISTENCIA)
-            .should().dependOnClassesThat().resideInAnyPackage("org.jooq..", "..adapter.out.persistence.jooq..")
+            .that()
+            .resideOutsideOfPackage(PACOTE_DE_PERSISTENCIA)
+            .should()
+            .dependOnClassesThat()
+            .resideInAnyPackage("org.jooq..", "..adapter.out.persistence.jooq..")
             .because("os tipos do jOOQ não saem da camada de persistência; as conversões acontecem no adapter");
 
     /**
@@ -44,35 +52,44 @@ class RegrasDeArquiteturaTest {
      */
     @ArchTest
     static final ArchRule logsSoPeloSlf4j = noClasses()
-            .that().resideOutsideOfPackage(PACOTE_DA_INFRAESTRUTURA_DE_LOG)
-            .should().dependOnClassesThat().resideInAnyPackage("org.apache.logging.log4j..", "ch.qos.logback..", "java.util.logging..")
+            .that()
+            .resideOutsideOfPackage(PACOTE_DA_INFRAESTRUTURA_DE_LOG)
+            .should()
+            .dependOnClassesThat()
+            .resideInAnyPackage("org.apache.logging.log4j..", "ch.qos.logback..", "java.util.logging..")
             .because("o código loga só via SLF4J; o Log4j2 é detalhe de implementação, configurado em "
                     + PACOTE_DA_INFRAESTRUTURA_DE_LOG);
 
     /** Tempo sempre pelo Clock injetado (spec 10): now() só é aceito recebendo um Clock. */
     @ArchTest
     static final ArchRule tempoSoPeloClockInjetado = noClasses()
-            .should().callMethodWhere(chamadaDeNowSemClock())
+            .should()
+            .callMethodWhere(chamadaDeNowSemClock())
             .because("o tempo vem do bean java.time.Clock injetado, para manter os testes determinísticos");
 
     /** O relógio do sistema só é criado na configuração do bean Clock. */
     @ArchTest
     static final ArchRule relogioDoSistemaSoNaConfiguracao = noClasses()
-            .that().resideOutsideOfPackage(PACOTE_DO_RELOGIO)
-            .should().callMethodWhere(chamadaDeRelogioDoSistema())
+            .that()
+            .resideOutsideOfPackage(PACOTE_DO_RELOGIO)
+            .should()
+            .callMethodWhere(chamadaDeRelogioDoSistema())
             .because("o Clock do sistema é criado uma vez só, como bean, em " + PACOTE_DO_RELOGIO);
 
     private static DescribedPredicate<JavaMethodCall> chamadaDeNowSemClock() {
-        return DescribedPredicate.describe("now() de java.time sem Clock", javaMethodCall ->
-                javaMethodCall.getTargetOwner().getPackageName().equals("java.time")
-                        && javaMethodCall.getName().equals("now")
-                        && javaMethodCall.getTarget().getRawParameterTypes().stream()
-                                .noneMatch(javaClass -> javaClass.isEquivalentTo(Clock.class)));
+        return DescribedPredicate.describe(
+                "now() de java.time sem Clock",
+                javaMethodCall ->
+                        javaMethodCall.getTargetOwner().getPackageName().equals("java.time")
+                                && javaMethodCall.getName().equals("now")
+                                && javaMethodCall.getTarget().getRawParameterTypes().stream()
+                                        .noneMatch(javaClass -> javaClass.isEquivalentTo(Clock.class)));
     }
 
     private static DescribedPredicate<JavaMethodCall> chamadaDeRelogioDoSistema() {
-        return DescribedPredicate.describe("Clock.system*()", javaMethodCall ->
-                javaMethodCall.getTargetOwner().isEquivalentTo(Clock.class)
+        return DescribedPredicate.describe(
+                "Clock.system*()",
+                javaMethodCall -> javaMethodCall.getTargetOwner().isEquivalentTo(Clock.class)
                         && javaMethodCall.getName().startsWith("system"));
     }
 }

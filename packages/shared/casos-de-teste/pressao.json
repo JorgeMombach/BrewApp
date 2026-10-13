@@ -1,0 +1,16 @@
+{
+  "grandeza": "PRESSAO",
+  "referencia": "Fatores exatos do NIST SP 811 (2008), apêndice B: 1 bar = 100 kPa; 1 psi = 0,45359237 kg × 9,80665 m/s² / (0,0254 m)² = 6,894757293168 kPa. A tolerância cobre só o arredondamento dos valores esperados.",
+  "casos": [
+    { "descricao": "pressão atmosférica padrão aproximada", "de": { "valor": 100, "unidade": "KPA" }, "para": "BAR", "esperado": 1, "tolerancia": 1e-9 },
+    { "descricao": "carbonatação forçada", "de": { "valor": 250, "unidade": "KPA" }, "para": "BAR", "esperado": 2.5, "tolerancia": 1e-9 },
+    { "descricao": "um psi", "de": { "valor": 1, "unidade": "PSI" }, "para": "BAR", "esperado": 0.0689475729, "tolerancia": 1e-9 },
+    { "descricao": "pressão de spunding", "de": { "valor": 30, "unidade": "PSI" }, "para": "BAR", "esperado": 2.068427188, "tolerancia": 1e-9 },
+    { "descricao": "um bar", "de": { "valor": 1, "unidade": "BAR" }, "para": "KPA", "esperado": 100, "tolerancia": 1e-9 },
+    { "descricao": "um bar", "de": { "valor": 1, "unidade": "BAR" }, "para": "PSI", "esperado": 14.503773773, "tolerancia": 1e-9 },
+    { "descricao": "carbonatação forçada", "de": { "valor": 2.5, "unidade": "BAR" }, "para": "PSI", "esperado": 36.259434433, "tolerancia": 1e-9 },
+    { "descricao": "entre duas unidades não canônicas", "de": { "valor": 12, "unidade": "PSI" }, "para": "KPA", "esperado": 82.737087518, "tolerancia": 1e-9 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 1.2, "unidade": "BAR" }, "para": "BAR", "esperado": 1.2, "tolerancia": 0 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 15, "unidade": "PSI" }, "para": "PSI", "esperado": 15, "tolerancia": 0 }
+  ]
+}

@@ -2,6 +2,16 @@
 export type { components, paths } from './api/esquema.gerado';
 export type { ProblemDetails, ErroDeValidacao } from './api/erros';
 
-// Conversões compartilhadas com o backend, testadas contra os mesmos casos (casos-de-teste/)
-export { UNIDADES_DE_DENSIDADE, converterDensidade, ehUnidadeDeDensidade } from './unidades/densidade';
-export type { UnidadeDeDensidade } from './unidades/densidade';
+// Catálogo de unidades compartilhado com o backend, testado contra os mesmos casos (casos-de-teste/)
+export {
+  GRANDEZAS,
+  UNIDADES,
+  converter,
+  ehCanonica,
+  ehGrandeza,
+  ehUnidade,
+  ehUnidadeDaGrandeza,
+  grandezaDe,
+  unidadeCanonica,
+} from './unidades/catalogo';
+export type { Grandeza, Unidade } from './unidades/catalogo';

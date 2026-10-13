@@ -86,6 +86,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
+        <!-- Só anotações (@NamedInterface): expõem subpacotes do shared aos demais módulos -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-api</artifactId>
+        </dependency>
         <!-- Persistência schema-first (spec 5.1): Flyway aplica as migrations, jOOQ consulta -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -118,7 +118,7 @@ Todos os erros seguem o formato **Problem Details (RFC 9457)**, estendido com um
 
 **Recurso de outra organização responde 404, não 403.** Responder 403 confirmaria que o recurso existe, e isso já é vazamento de informação.
 
-**Códigos genéricos.** Valem para qualquer endpoint e não dependem do domínio. Os códigos de negócio (como `LOTE_ENVASADO`) são documentados junto de cada endpoint.
+**Códigos genéricos.** Valem para qualquer endpoint e não dependem do domínio. Os códigos de negócio (como `LOTE_ENVASADO`) são documentados junto de cada endpoint. A exceção é `UNIDADE_INVALIDA`, que vale para todo campo de quantidade e está descrito no catálogo de unidades (seção 1.11).
 
 | `code` | Status | Quando |
 |---|---|---|
@@ -190,9 +190,13 @@ Toda grandeza aceita várias unidades, porque cada cervejaria usa o seu padrão.
 | Volume | `L`, `HL`, `ML`, `GAL_US`, `GAL_UK`, `BBL_US` | L |
 | Massa | `G`, `KG`, `OZ`, `LB` | g |
 
-- `G_CM3` é convertido para SG usando a densidade da água a 20 °C como referência.
-- `BBL_US` é o barril de cerveja americano (117,348 L), comum em equipamentos de cervejaria artesanal.
+- `PLATO` e `BRIX` são a mesma escala de sacarose (porcentagem em massa de extrato) e usam a mesma conversão. A leitura crua de um refratômetro depois do início da fermentação é distorcida pelo álcool e não é corrigida pelo catálogo, porque a correção depende do OG do lote (BREW-70).
+- `G_CM3` é convertido para SG usando a densidade da água a 20 °C (0,9982067 g/cm³) como referência.
+- `BBL_US` é o barril de cerveja americano (31 galões US, cerca de 117,348 L), comum em equipamentos de cervejaria artesanal.
 - A API sempre devolve o valor informado (com sua unidade) e o valor canônico. A conversão para a unidade preferida do usuário é feita no cliente.
+- O valor informado é guardado exatamente como chegou. O canônico, quando há conversão, tem 6 casas decimais; na própria unidade canônica, é o valor informado.
+- Unidade de outra grandeza no campo (por exemplo, `G` numa capacidade) responde **422** `UNIDADE_INVALIDA`, com `params` `{ "unidade": "G", "grandeza": "VOLUME" }`. Sinal e faixa do valor são regras de cada campo.
+- Os valores esperados dos casos de teste vêm de referências externas: tabela de extrato da ASBC (Plato), tabela de sacarose do USDA (Brix) e fatores exatos do NIST SP 811 (demais unidades).
 
 ---
 

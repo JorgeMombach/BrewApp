@@ -1,0 +1,19 @@
+{
+  "grandeza": "VOLUME",
+  "referencia": "Fatores exatos do NIST SP 811 (2008), apêndice B: galão US = 3,785411784 L; galão UK = 4,54609 L; barril de cerveja US = 31 galões US = 117,347765304 L. A tolerância cobre só o arredondamento dos valores esperados.",
+  "casos": [
+    { "descricao": "um hectolitro", "de": { "valor": 1, "unidade": "HL" }, "para": "L", "esperado": 100, "tolerancia": 1e-9 },
+    { "descricao": "lote de 20 hL", "de": { "valor": 20, "unidade": "HL" }, "para": "L", "esperado": 2000, "tolerancia": 1e-9 },
+    { "descricao": "garrafa de 500 mL", "de": { "valor": 500, "unidade": "ML" }, "para": "L", "esperado": 0.5, "tolerancia": 1e-9 },
+    { "descricao": "um galão US", "de": { "valor": 1, "unidade": "GAL_US" }, "para": "L", "esperado": 3.785411784, "tolerancia": 1e-9 },
+    { "descricao": "lote caseiro de 5 galões", "de": { "valor": 5, "unidade": "GAL_US" }, "para": "L", "esperado": 18.92705892, "tolerancia": 1e-9 },
+    { "descricao": "um galão UK", "de": { "valor": 1, "unidade": "GAL_UK" }, "para": "L", "esperado": 4.54609, "tolerancia": 1e-9 },
+    { "descricao": "um barril US", "de": { "valor": 1, "unidade": "BBL_US" }, "para": "L", "esperado": 117.347765304, "tolerancia": 1e-9 },
+    { "descricao": "fermentador de 7 barris", "de": { "valor": 7, "unidade": "BBL_US" }, "para": "L", "esperado": 821.434357128, "tolerancia": 1e-9 },
+    { "descricao": "tanque de 1000 L", "de": { "valor": 1000, "unidade": "L" }, "para": "BBL_US", "esperado": 8.521679108, "tolerancia": 1e-9 },
+    { "descricao": "lote caseiro de 20 L", "de": { "valor": 20, "unidade": "L" }, "para": "GAL_US", "esperado": 5.283441047, "tolerancia": 1e-9 },
+    { "descricao": "entre duas unidades não canônicas", "de": { "valor": 1, "unidade": "HL" }, "para": "GAL_UK", "esperado": 21.99692483, "tolerancia": 1e-9 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 500, "unidade": "L" }, "para": "L", "esperado": 500, "tolerancia": 0 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 7, "unidade": "BBL_US" }, "para": "BBL_US", "esperado": 7, "tolerancia": 0 }
+  ]
+}

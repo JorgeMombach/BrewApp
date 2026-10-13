@@ -2,6 +2,7 @@ package dev.brewapp.shared.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.brewapp.shared.unidade.ErroDeUnidade;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
@@ -14,29 +15,36 @@ class ContratoDeCodigosDeErroTest {
 
     @Test
     void codigosGenericosSaoOsDoDesignDaApi() {
-        assertThat(Arrays.stream(ErroGenerico.values()).map(Enum::name)).containsExactlyInAnyOrder(
-                "VALIDACAO_FALHOU",
-                "CORPO_MALFORMADO",
-                "REQUISICAO_INVALIDA",
-                "NAO_AUTENTICADO",
-                "ACESSO_NEGADO",
-                "ROTA_NAO_ENCONTRADA",
-                "METODO_NAO_SUPORTADO",
-                "TIPO_DE_RESPOSTA_NAO_SUPORTADO",
-                "TIPO_DE_CONTEUDO_NAO_SUPORTADO",
-                "ERRO_INTERNO");
+        assertThat(Arrays.stream(ErroGenerico.values()).map(Enum::name))
+                .containsExactlyInAnyOrder(
+                        "VALIDACAO_FALHOU",
+                        "CORPO_MALFORMADO",
+                        "REQUISICAO_INVALIDA",
+                        "NAO_AUTENTICADO",
+                        "ACESSO_NEGADO",
+                        "ROTA_NAO_ENCONTRADA",
+                        "METODO_NAO_SUPORTADO",
+                        "TIPO_DE_RESPOSTA_NAO_SUPORTADO",
+                        "TIPO_DE_CONTEUDO_NAO_SUPORTADO",
+                        "ERRO_INTERNO");
     }
 
     @Test
     void codigosDeValidacaoSaoOsDoDesignDaApi() {
-        assertThat(Arrays.stream(CodigoDeValidacao.values()).map(Enum::name)).containsExactlyInAnyOrder(
-                "OBRIGATORIO",
-                "DEVE_SER_POSITIVO",
-                "NAO_PODE_SER_NEGATIVO",
-                "TAMANHO_INVALIDO",
-                "ABAIXO_DO_MINIMO",
-                "ACIMA_DO_MAXIMO",
-                "FORMATO_INVALIDO",
-                "VALOR_INVALIDO");
+        assertThat(Arrays.stream(CodigoDeValidacao.values()).map(Enum::name))
+                .containsExactlyInAnyOrder(
+                        "OBRIGATORIO",
+                        "DEVE_SER_POSITIVO",
+                        "NAO_PODE_SER_NEGATIVO",
+                        "TAMANHO_INVALIDO",
+                        "ABAIXO_DO_MINIMO",
+                        "ACIMA_DO_MAXIMO",
+                        "FORMATO_INVALIDO",
+                        "VALOR_INVALIDO");
+    }
+
+    @Test
+    void codigosDeUnidadeSaoOsDoDesignDaApi() {
+        assertThat(Arrays.stream(ErroDeUnidade.values()).map(Enum::name)).containsExactlyInAnyOrder("UNIDADE_INVALIDA");
     }
 }

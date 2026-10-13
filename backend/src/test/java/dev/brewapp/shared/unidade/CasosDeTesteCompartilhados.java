@@ -14,7 +14,15 @@ final class CasosDeTesteCompartilhados {
 
     private static final String PASTA_NO_CLASSPATH = "/casos-de-teste/";
 
+    /** Um arquivo por grandeza do catálogo; uma grandeza nova entra nesta lista junto com o seu arquivo. */
+    private static final List<String> ARQUIVOS =
+            List.of("densidade.json", "temperatura.json", "pressao.json", "volume.json", "massa.json");
+
     private CasosDeTesteCompartilhados() {}
+
+    static List<ArquivoDeCasos> carregarTodos() {
+        return ARQUIVOS.stream().map(CasosDeTesteCompartilhados::carregar).toList();
+    }
 
     static ArquivoDeCasos carregar(String nomeDoArquivo) {
         try (InputStream arquivo =
