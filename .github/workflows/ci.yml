@@ -13,10 +13,11 @@ on:
 permissions:
   contents: read
 
-# Um push novo na mesma branch ou PR cancela a execução anterior
+# Um push novo na mesma PR cancela a execução anterior. No push para main e epic/** não cancela: cada commit
+# que entra nessas branches precisa da sua CI, e o "ci-concluida" trata cancelamento como falha
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   mudancas:
@@ -27,6 +28,7 @@ jobs:
       pull-requests: read
     outputs:
       backend: ${{ steps.filtro.outputs.backend }}
+      contrato: ${{ steps.filtro.outputs.contrato }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -40,6 +42,15 @@ jobs:
             backend:
               - 'backend/**'
               - 'infra/postgres/**'
+              # Os testes Java leem os casos compartilhados e regravam o contrato exportado
+              - 'packages/shared/casos-de-teste/**'
+              - 'packages/shared/openapi/**'
+              - '.github/workflows/ci.yml'
+            contrato:
+              - 'packages/shared/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
               - '.github/workflows/ci.yml'
 
   backend:
@@ -61,8 +72,18 @@ jobs:
           java-version: '25'
           cache: maven
           cache-dependency-path: backend/pom.xml
-      # verify roda os testes (Testcontainers usa o Docker do runner), a verificação do Spring Modulith e o ArchUnit
+      # verify roda os testes (Testcontainers usa o Docker do runner), a verificação do Spring Modulith e o ArchUnit.
+      # O ContratoDaApiTest regrava packages/shared/openapi/openapi.json a partir dos controllers
       - run: ./mvnw --batch-mode --no-transfer-progress verify
+      - name: Falhar se o contrato exportado diferir do commitado
+        run: |
+          divergencias=$(git status --porcelain -- ../packages/shared/openapi)
+          if [ -n "$divergencias" ]; then
+            echo "::error::O contrato OpenAPI não acompanha os controllers. Rode './mvnw verify' (ou o ContratoDaApiTest), depois 'pnpm --filter @brewapp/shared gerar:tipos', e commite os dois arquivos (ADR 0013)."
+            echo "$divergencias"
+            git --no-pager diff -- ../packages/shared/openapi
+            exit 1
+          fi
 
   formatacao-backend:
     name: Formatação do backend (só arquivos alterados)
@@ -121,6 +142,41 @@ jobs:
             git --no-pager diff --stat -- src/main/generated
             exit 1
           fi
+
+  contrato:
+    name: Contrato da API e casos compartilhados (packages/shared)
+    needs: mudancas
+    if: needs.mudancas.outputs.contrato == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/shared
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Versão do pnpm vem do campo packageManager do package.json da raiz
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Regenerar os tipos a partir do contrato
+        run: pnpm gerar:tipos
+      - name: Falhar se os tipos regenerados diferirem dos commitados
+        run: |
+          divergencias=$(git status --porcelain -- src/api)
+          if [ -n "$divergencias" ]; then
+            echo "::error::Os tipos TypeScript não acompanham o contrato OpenAPI. Rode 'pnpm --filter @brewapp/shared gerar:tipos' e commite o resultado (ADR 0013)."
+            echo "$divergencias"
+            git --no-pager diff -- src/api
+            exit 1
+          fi
+      - run: pnpm typecheck
+      # Conversões em TypeScript contra os mesmos casos dos testes Java (spec 4.5)
+      - run: pnpm test
 
   # Segurança roda sempre, sem filtro de caminho: segredo ou dependência vulnerável pode entrar por qualquer pasta
   segredos:
@@ -189,7 +245,7 @@ jobs:
 
   ci-concluida:
     name: CI concluída
-    needs: [mudancas, backend, formatacao-backend, jooq-divergencia, segredos, vulnerabilidades]
+    needs: [mudancas, backend, formatacao-backend, jooq-divergencia, contrato, segredos, vulnerabilidades]
     if: always()
     runs-on: ubuntu-24.04
     steps:

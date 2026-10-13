@@ -39,7 +39,7 @@ O backlog original (17 pontos) foi concluído em 07/10. Em vez de encerrar o spr
 | 5 | Compromisso | BREW-45 Catálogo de unidades | 5 | Usa os casos de teste compartilhados da 18; pré-requisito de Recipientes e Lotes |
 | 6 | Se der | BREW-17 App web e desktop | 3 | Usa os tipos gerados na 18; maior risco do sprint (toolchain do Rust para o Tauri) |
 | 7 | Se der | BREW-19 Internacionalização | 3 | Depende da 17 e da 18 |
-| 8 | Se der | BREW-22 ADRs restantes | 2 | Fecha a epic; o ADR 0013 depende da 18 |
+| 8 | Se der | BREW-22 ADRs restantes | 2 | Fecha a epic; o ADR 0013 saiu na própria BREW-18 (ver decisões de 13/10) |
 
 - **Novo compromisso:** 17 pontos já entregues + 16 pontos (itens 1 a 5) = 33 pontos
 - **Se der:** + 8 pontos (itens 6 a 8) = 41 pontos, com a epic BREW-5 fechada
@@ -84,6 +84,12 @@ Concluída a epic, ela é mergeada na `main` (primeira entrega na `main`), com o
 | 12/10 | Trivy só nas dependências (`pom.xml` e `pnpm-lock.yaml`), quebrando em vulnerabilidade crítica que já tem correção; as sem correção ficam no relatório da aba Security. Varredura de imagem (spec 9.6) entra quando existir a imagem do backend, junto com o CD. |
 | 12/10 | Pull requests do Dependabot vão direto para a `main`, como hotfix de manutenção, seguidas da sincronização na epic. Imagens do docker-compose ficam fora do Dependabot enquanto a imagem do PostgreSQL estiver repetida em três lugares (ADR 0002). |
 | 12/10 | Fim da exceção de 03/10 à Definition of Done: a partir do merge da BREW-20 na epic, história pronta exige CI verde. A checagem de divergência do jOOQ passa de passo local a job da CI. |
+| 13/10 | ADR 0013 (contrato da API gerado a partir do código) escrito na BREW-18, junto com a implementação, e não na BREW-22: a Definition of Done pede o ADR na entrega que introduz a decisão. A BREW-22 fica com o template, os ADRs 0001 e 0003 e o índice. |
+| 13/10 | Contrato OpenAPI exportado por teste de integração para `packages/shared/openapi/openapi.json` e tipos TypeScript gerados a partir dele, ambos versionados, com checagem de divergência na CI (jobs do backend e do contrato). Documento e Swagger UI só no perfil `dev`. Detalhes no ADR 0013. |
+| 13/10 | TypeScript 5.9 no monorepo: o `openapi-typescript` não suporta o TypeScript 7 (compilador em Go). Vale também para o app web (BREW-17). |
+| 13/10 | Casos compartilhados de densidade seguem a tabela de extrato da ASBC, com tolerância por caso (0,0001 SG e 0,01 °P), porque a conversão entre Plato e SG não é linear e as fórmulas são aproximações. |
+| 13/10 | Ajuste da CI encontrado depois da BREW-20, feito na BREW-18: `cancel-in-progress` só em pull request, no `ci.yml` e no `codeql.yml`. No push para `main` e `epic/**`, cancelar deixava um commit sem resultado de CI ou de CodeQL. JavaScript/TypeScript entra na matriz do CodeQL já nesta história, com o primeiro código TypeScript. |
+| 13/10 | Prettier e ESLint entram na BREW-17, configurados na raiz do monorepo e valendo também para o `packages/shared`, que entrou na BREW-18 sem formatador. O job do contrato passa a rodar o lint do pacote. Critério incluído na BREW-17 no Jira. |
 
 ## Resultado (preencher na retro)
 

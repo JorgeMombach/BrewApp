@@ -1,0 +1,22 @@
+{
+  "grandeza": "DENSIDADE",
+  "referencia": "Tabela de extrato da ASBC (SG a 20/20 °C), valores arredondados. Tolerância de 0,0001 SG e 0,01 °P: cobre o arredondamento da tabela e ainda acusa um coeficiente errado nas fórmulas.",
+  "casos": [
+    { "descricao": "água pura", "de": { "valor": 0, "unidade": "PLATO" }, "para": "SG", "esperado": 1.0, "tolerancia": 0.0001 },
+    { "descricao": "mosto fraco", "de": { "valor": 5, "unidade": "PLATO" }, "para": "SG", "esperado": 1.0197, "tolerancia": 0.0001 },
+    { "descricao": "mosto de pilsen", "de": { "valor": 10, "unidade": "PLATO" }, "para": "SG", "esperado": 1.04, "tolerancia": 0.0001 },
+    { "descricao": "mosto de 12 °P", "de": { "valor": 12, "unidade": "PLATO" }, "para": "SG", "esperado": 1.0484, "tolerancia": 0.0001 },
+    { "descricao": "mosto de 15 °P", "de": { "valor": 15, "unidade": "PLATO" }, "para": "SG", "esperado": 1.0611, "tolerancia": 0.0001 },
+    { "descricao": "mosto de alta densidade", "de": { "valor": 20, "unidade": "PLATO" }, "para": "SG", "esperado": 1.083, "tolerancia": 0.0001 },
+    { "descricao": "mosto de barley wine", "de": { "valor": 25, "unidade": "PLATO" }, "para": "SG", "esperado": 1.1057, "tolerancia": 0.0001 },
+    { "descricao": "água pura", "de": { "valor": 1.0, "unidade": "SG" }, "para": "PLATO", "esperado": 0, "tolerancia": 0.01 },
+    { "descricao": "final de fermentação", "de": { "valor": 1.01, "unidade": "SG" }, "para": "PLATO", "esperado": 2.56, "tolerancia": 0.01 },
+    { "descricao": "mosto de pilsen", "de": { "valor": 1.04, "unidade": "SG" }, "para": "PLATO", "esperado": 10.0, "tolerancia": 0.01 },
+    { "descricao": "mosto de 1.050", "de": { "valor": 1.05, "unidade": "SG" }, "para": "PLATO", "esperado": 12.39, "tolerancia": 0.01 },
+    { "descricao": "mosto de 1.060", "de": { "valor": 1.06, "unidade": "SG" }, "para": "PLATO", "esperado": 14.74, "tolerancia": 0.01 },
+    { "descricao": "mosto de alta densidade", "de": { "valor": 1.083, "unidade": "SG" }, "para": "PLATO", "esperado": 20.0, "tolerancia": 0.01 },
+    { "descricao": "mosto de 1.100", "de": { "valor": 1.1, "unidade": "SG" }, "para": "PLATO", "esperado": 23.77, "tolerancia": 0.01 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 1.05, "unidade": "SG" }, "para": "SG", "esperado": 1.05, "tolerancia": 0 },
+    { "descricao": "mesma unidade não altera o valor", "de": { "valor": 12, "unidade": "PLATO" }, "para": "PLATO", "esperado": 12, "tolerancia": 0 }
+  ]
+}

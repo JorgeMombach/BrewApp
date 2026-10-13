@@ -4,6 +4,13 @@ management:
     health:
       show-details: always
 
+# Contrato da API navegável em http://localhost:${BREWAPP_SERVER_PORT}/swagger-ui.html (rotas públicas só aqui)
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 logging:
   level:
     dev.brewapp: DEBUG

@@ -180,6 +180,8 @@ A API é REST, com o contrato OpenAPI gerado a partir do código do backend. O p
 
 As regras de cálculo que precisam rodar nos dois lados (conversão entre graus Plato e gravidade específica, volumes de CO₂) são implementadas em Java (fonte da verdade) e em TypeScript (pré-visualização no aparelho, inclusive sem rede). Para garantir que não divirjam, **as duas implementações são testadas contra o mesmo arquivo de casos de teste.**
 
+Como o contrato e os tipos são versionados, onde ficam os casos de teste e como a CI verifica a divergência: ADR 0013.
+
 ---
 
 ## 5. Dados e persistência

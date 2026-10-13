@@ -4,6 +4,7 @@ import dev.brewapp.shared.CabecalhosBrewApp;
 import java.time.Duration;
 import java.util.List;
 import java.util.stream.Stream;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,19 +22,36 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 /**
  * Negação por padrão (spec 9.2): só a verificação de saúde é pública; todo o resto exige um JWT válido
  * (assinatura, emissor, destinatário e validade, configurados em spring.security.oauth2.resourceserver.jwt).
+ * A documentação da API também é pública, mas só onde está ligada (perfil dev, spec 4.5).
  */
 @Configuration
 @EnableConfigurationProperties(PropriedadesCors.class)
 class ConfiguracaoDeSeguranca {
 
+    /** Rotas padrão do springdoc: documento OpenAPI (e a configuração do Swagger UI) e as páginas do Swagger UI. */
+    private static final String[] ROTAS_DA_DOCUMENTACAO = {
+        "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**"
+    };
+
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, RespostaDeErroDeSeguranca respostaDeErroDeSeguranca)
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity httpSecurity,
+            RespostaDeErroDeSeguranca respostaDeErroDeSeguranca,
+            @Value("${springdoc.api-docs.enabled}") boolean documentacaoDaApiLigada)
             throws Exception {
         return httpSecurity
-                .authorizeHttpRequests(requestMatcherRegistry -> requestMatcherRegistry
-                        // /actuator/health/** cobre os grupos liveness e readiness, usados por orquestradores
-                        .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(requestMatcherRegistry -> {
+                    // /actuator/health/** cobre os grupos liveness e readiness, usados por orquestradores
+                    requestMatcherRegistry
+                            .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**")
+                            .permitAll();
+                    if (documentacaoDaApiLigada) {
+                        requestMatcherRegistry
+                                .requestMatchers(HttpMethod.GET, ROTAS_DA_DOCUMENTACAO)
+                                .permitAll();
+                    }
+                    requestMatcherRegistry.anyRequest().authenticated();
+                })
                 .oauth2ResourceServer(resourceServerConfigurer -> resourceServerConfigurer
                         .jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(respostaDeErroDeSeguranca)
@@ -44,8 +62,8 @@ class ConfiguracaoDeSeguranca {
                 .cors(Customizer.withDefaults())
                 // API sem cookie de sessão (token Bearer): não há o que proteger com CSRF
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sessionManagementConfigurer ->
+                        sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
@@ -54,13 +72,18 @@ class ConfiguracaoDeSeguranca {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(propriedadesCors.allowedOrigins());
         // Sem DELETE nem PUT: a API não os usa (design da API, seção 1.8)
-        corsConfiguration.setAllowedMethods(Stream.of(HttpMethod.GET, HttpMethod.POST, HttpMethod.PATCH, HttpMethod.OPTIONS)
-                .map(HttpMethod::name)
-                .toList());
+        corsConfiguration.setAllowedMethods(
+                Stream.of(HttpMethod.GET, HttpMethod.POST, HttpMethod.PATCH, HttpMethod.OPTIONS)
+                        .map(HttpMethod::name)
+                        .toList());
         // Cabeçalhos da seção 1.2 do design da API
         corsConfiguration.setAllowedHeaders(List.of(
-                HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT_LANGUAGE, HttpHeaders.IF_MATCH,
-                CabecalhosBrewApp.X_ORGANIZATION_ID, CabecalhosBrewApp.X_CORRELATION_ID));
+                HttpHeaders.AUTHORIZATION,
+                HttpHeaders.CONTENT_TYPE,
+                HttpHeaders.ACCEPT_LANGUAGE,
+                HttpHeaders.IF_MATCH,
+                CabecalhosBrewApp.X_ORGANIZATION_ID,
+                CabecalhosBrewApp.X_CORRELATION_ID));
         corsConfiguration.setExposedHeaders(List.of(
                 HttpHeaders.ETAG, HttpHeaders.LOCATION, HttpHeaders.RETRY_AFTER, CabecalhosBrewApp.X_CORRELATION_ID));
         // Token no cabeçalho Authorization, nunca em cookie
