@@ -34,3 +34,14 @@ updates:
     groups:
       npm-menores:
         update-types: [minor, patch]
+
+  # Casca desktop (Tauri), pelo Cargo.lock. Os crates do Tauri andam junto com o @tauri-apps/cli do npm
+  - package-ecosystem: cargo
+    directory: /apps/web/src-tauri
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      cargo-menores:
+        update-types: [minor, patch]

@@ -1,0 +1,16 @@
+# Prettier formata o código TypeScript e as configs de apps/ e packages/. Indentação e fim de linha vêm do .editorconfig.
+# Java tem o Spotless; documentação, infraestrutura e workflows são editados à mão
+backend/
+infra/
+docs/
+.github/
+.claude/
+*.md
+pnpm-lock.yaml
+
+# Gerados (ADR 0013): o formato é o do gerador, e a CI compara com o commitado
+packages/shared/openapi/
+**/*.gerado.ts
+
+# Casos compartilhados com os testes Java, mantidos à mão
+packages/shared/casos-de-teste/

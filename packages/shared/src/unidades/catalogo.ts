@@ -61,10 +61,7 @@ const CANONICA = afim(1, 0);
 const ESCALA_DE_SACAROSE: Conversao = {
   paraCanonica: (grausDeExtrato) => 1 + grausDeExtrato / (258.6 - (grausDeExtrato / 258.2) * 227.1),
   daCanonica: (gravidadeEspecifica) =>
-    -616.868 +
-    1111.14 * gravidadeEspecifica -
-    630.272 * gravidadeEspecifica ** 2 +
-    135.997 * gravidadeEspecifica ** 3,
+    -616.868 + 1111.14 * gravidadeEspecifica - 630.272 * gravidadeEspecifica ** 2 + 135.997 * gravidadeEspecifica ** 3,
 };
 
 interface EntradaDoCatalogo {

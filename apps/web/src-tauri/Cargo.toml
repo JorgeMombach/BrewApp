@@ -1,0 +1,18 @@
+[package]
+name = "brewapp-desktop"
+version = "0.1.0"
+description = "Casca desktop do BrewApp: o mesmo app web, empacotado pelo Tauri"
+edition = "2024"
+rust-version = "1.90"
+publish = false
+
+[lib]
+# O sufixo _lib evita conflito de nome com o binário no Windows
+name = "brewapp_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.3", features = [] }
+
+[dependencies]
+tauri = { version = "2.12.4", features = [] }

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissões básicas do núcleo do Tauri para a janela principal; o app web ainda não chama nada nativo",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

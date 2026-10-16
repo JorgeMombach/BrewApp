@@ -12,7 +12,7 @@ O BrewApp troca o papel por um diário estruturado, em que cada intervenção é
 
 ## Status
 
-MVP em construção. A fundação técnica está pronta: backend, banco de dados, autenticação, logs e regras de arquitetura verificadas no build. As funcionalidades de negócio e os aplicativos web, desktop e mobile ainda serão desenvolvidos.
+MVP em construção. A fundação técnica está pronta: backend, banco de dados, autenticação, logs e regras de arquitetura verificadas no build. O app web e desktop já tem a sua base (roteamento, cliente da API e a casca desktop com Tauri). As funcionalidades de negócio e o aplicativo mobile ainda serão desenvolvidos.
 
 O MVP é para uso pessoal, mas o modelo de dados e a autorização já nascem preparados para várias organizações e usuários com papéis diferentes.
 
@@ -40,9 +40,9 @@ Os detalhes e os motivos de cada decisão estão na spec do MVP e nos ADRs (link
 | Pasta | Conteúdo |
 |---|---|
 | `backend/` | API em Spring Boot, migrations e código gerado pelo jOOQ |
-| `apps/web/` | App web e desktop (em breve) |
+| `apps/web/` | App web em React; a casca desktop (Tauri) fica em `apps/web/src-tauri/` |
 | `apps/mobile/` | App mobile (em breve) |
-| `packages/shared/` | Tipos da API, traduções e catálogo de unidades compartilhados entre os apps (em breve) |
+| `packages/shared/` | Tipos da API e catálogo de unidades compartilhados entre os apps; as traduções entram em breve |
 | `infra/` | PostgreSQL e Keycloak para desenvolvimento local, via Docker Compose |
 | `docs/` | Spec, design da API, processo, ADRs e planos de sprint |
 
@@ -54,6 +54,7 @@ Os detalhes e os motivos de cada decisão estão na spec do MVP e nos ADRs (link
 - Docker com Compose v2, como o Docker Desktop
 - Node.js 24 ou mais recente e pnpm (a versão usada está fixada no `package.json` da raiz; com o Corepack ativo, ela é instalada sozinha)
 - gitleaks, para a varredura de segredos antes de cada commit (no Windows: `winget install Gitleaks.Gitleaks`)
+- Só para o app desktop: Rust e, no Windows, as ferramentas de compilação C++ da Microsoft (veja o passo 7)
 
 ### 1. Instalar as dependências e ativar o hook de commit
 
@@ -125,9 +126,45 @@ Na pull request, a CI confere a formatação dos arquivos alterados em relação
 ./mvnw spotless:apply -Dformatacao.base=origin/epic/BREW-5
 ```
 
+### 7. Rodar o app web e o desktop
+
+Na raiz do repositório, o app web sobe em `http://localhost:5173`:
+
+```bash
+pnpm --filter @brewapp/web dev
+```
+
+O desktop abre o mesmo app numa janela própria, servido em `http://127.0.0.1:1420`. As duas portas são fixas porque estão cadastradas no Keycloak e no CORS do backend. Antes da primeira vez, no Windows, instale as ferramentas de compilação C++ e o Rust; depois, abra um terminal novo para o PATH ser atualizado:
+
+```bash
+winget install --id Microsoft.VisualStudio.2022.BuildTools --source winget --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+winget install --id Rustlang.Rustup --source winget
+```
+
+Com isso instalado, na raiz do repositório:
+
+```bash
+pnpm --filter @brewapp/web tauri dev
+```
+
+A primeira execução compila as dependências do Rust e leva alguns minutos; as seguintes são rápidas. Mudanças no código do app web aparecem na janela sem recompilar o Rust.
+
+Os testes do app rodam com `pnpm --filter @brewapp/web test`, sem Docker nem backend.
+
+### 8. Lint e formatação do TypeScript
+
+O ESLint e o Prettier são configurados na raiz e valem para o app web e para o `packages/shared`. O lint proíbe `any` e casts forçados: tipo errado se corrige na definição. Para conferir tudo e para formatar, na raiz:
+
+```bash
+pnpm lint
+pnpm formatar
+```
+
+Cada pacote também tem os seus `lint` e `formatar`, que a CI usa (por exemplo, `pnpm --filter @brewapp/web lint`).
+
 ## Integração contínua
 
-Toda pull request e todo push para a `main` e para as branches de epic passam pelo GitHub Actions: build e testes do backend, regras de arquitetura, formatação, conferência do código gerado pelo jOOQ, varredura de segredos, dependências vulneráveis e análise estática com o CodeQL. O merge na `main` só é liberado com tudo verde. O Dependabot propõe as atualizações de dependências toda semana. Os detalhes estão no [fluxo de branches](docs/processo/fluxo-de-branches.md).
+Toda pull request e todo push para a `main` e para as branches de epic passam pelo GitHub Actions: build e testes do backend, regras de arquitetura, formatação, conferência do código gerado pelo jOOQ, lint, testes e build do app web, varredura de segredos, dependências vulneráveis e análise estática com o CodeQL. O merge na `main` só é liberado com tudo verde. O Dependabot propõe as atualizações de dependências toda semana. Os detalhes estão no [fluxo de branches](docs/processo/fluxo-de-branches.md).
 
 ## Documentação
 

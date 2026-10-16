@@ -1,0 +1,2 @@
+# Dois espaços, como o .editorconfig da raiz para tudo que não é Java, XML ou SQL
+tab_spaces = 2
