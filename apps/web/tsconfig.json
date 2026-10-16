@@ -1,0 +1,5 @@
+{
+  // Dois programas: o código do app (navegador) e a configuração do Vite (Node), cada um com os seus tipos globais
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+}

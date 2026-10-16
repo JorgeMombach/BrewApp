@@ -89,7 +89,9 @@ describe('catálogo de unidades', () => {
   });
 
   it('não converte entre grandezas diferentes', () => {
-    expect(() => converter(1.05, 'SG', 'L')).toThrow('Conversão entre grandezas diferentes: SG (DENSIDADE) para L (VOLUME)');
+    expect(() => converter(1.05, 'SG', 'L')).toThrow(
+      'Conversão entre grandezas diferentes: SG (DENSIDADE) para L (VOLUME)',
+    );
   });
 
   it('reconhece só os códigos do catálogo', () => {

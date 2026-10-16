@@ -148,6 +148,13 @@ Todos os erros seguem o formato **Problem Details (RFC 9457)**, estendido com um
 
 Uma regra de validação nova que não esteja nesta tabela usa o nome da regra em `UPPER_SNAKE_CASE` (por exemplo, `DECIMAL_MIN`) até ganhar um código próprio aqui.
 
+**Códigos do cliente.** Algumas falhas acontecem antes de existir um Problem Details para ler. Os clientes as entregam às telas com os códigos abaixo, no mesmo formato dos códigos da API, para que a interface traduza tudo do mesmo jeito. **O backend nunca devolve estes códigos**, e por isso eles ficam fora do teste de contrato dos códigos de erro. Como o cliente trata os erros: ADR 0017.
+
+| `code` | Status | Quando |
+|---|---|---|
+| `SEM_CONEXAO` | nenhum | A requisição não chegou ao servidor: sem rede, servidor fora do ar ou bloqueio de CORS |
+| `RESPOSTA_INESPERADA` | o da resposta | Resposta de erro fora do formato Problem Details, como a página de erro de um proxy ou gateway; o `correlationId` vem do cabeçalho `X-Correlation-Id`, se houver |
+
 ### 1.7 Concorrência (lock otimista)
 
 Recursos mutáveis (organização, recipiente, lote) usam o mecanismo padrão do HTTP:
