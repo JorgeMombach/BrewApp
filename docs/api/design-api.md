@@ -5,6 +5,8 @@
 
 Este documento desenha a API **antes** do código. Depois, o OpenAPI gerado pelo backend (Swagger) precisa corresponder ao que está descrito aqui. Quando os dois divergirem, ou o código está errado, ou este documento precisa ser atualizado de forma consciente.
 
+O documento gerado fica versionado em `packages/shared/openapi/openapi.json`, e os tipos TypeScript dos clientes saem dele (ADR 0013). Em desenvolvimento, ele pode ser navegado no Swagger UI (`/swagger-ui.html`, só no perfil `dev`).
+
 Ordem de desenho:
 
 1. Convenções gerais
@@ -33,7 +35,7 @@ Estas regras valem para todos os endpoints, sem exceção.
 |---|---|---|---|
 | `Authorization: Bearer <token>` | requisição | sempre, exceto `/actuator/health` | token emitido pelo Keycloak |
 | `X-Organization-Id` | requisição | em todo recurso de negócio | organização em uso; validada contra os vínculos do usuário |
-| `X-Correlation-Id` | requisição e resposta | não | se enviado, é reaproveitado; se não, o servidor gera. Sempre volta na resposta |
+| `X-Correlation-Id` | requisição e resposta | não | se enviado, é reaproveitado; se não, o servidor gera um UUID. Sempre volta na resposta. Formato aceito: 1 a 64 caracteres entre letras, dígitos, `.`, `_` e `-`; fora disso, o valor enviado é descartado e o servidor gera outro (o identificador vai para os logs) |
 | `Accept-Language` | requisição | não | **ignorado pelo backend** para mensagens (o cliente traduz); usado apenas como sugestão de idioma no primeiro acesso |
 | `ETag` / `If-Match` | resposta / requisição | `If-Match` em toda alteração de recurso mutável | controle de concorrência (ver 1.7) |
 
@@ -91,8 +93,10 @@ Todos os erros seguem o formato **Problem Details (RFC 9457)**, estendido com um
 ```
 
 - `code` é o contrato. O `title` existe só para leitura humana em logs e ferramentas; **o cliente nunca exibe o `title`**, e sim a tradução do `code`.
+- `correlationId` é o mesmo valor do cabeçalho `X-Correlation-Id` da resposta. Vem em todo erro, inclusive nos 401 e 403 da camada de segurança, para que o usuário possa informá-lo ao relatar um problema.
 - Em erros de validação, `errors` lista cada campo com problema: `{ "campo": "capacidade.valor", "code": "DEVE_SER_POSITIVO", "params": {} }`.
 - Nenhuma resposta de erro contém stack trace, nome de classe, SQL ou detalhe interno.
+- No OpenAPI, este formato é o schema `ProblemDetails` (com `ErroDeValidacao` como item de `errors`), e as respostas de erro dos endpoints o referenciam.
 
 **Códigos HTTP:**
 
@@ -102,13 +106,54 @@ Todos os erros seguem o formato **Problem Details (RFC 9457)**, estendido com um
 | 401 | Token ausente, inválido ou expirado |
 | 403 | Usuário autenticado sem a permissão necessária, ou sem vínculo com a organização do cabeçalho |
 | 404 | Recurso não existe **ou pertence a outra organização** |
+| 405 | Método HTTP não suportado na rota (a resposta traz o cabeçalho `Allow`) |
+| 406 | O `Accept` pedido não pode ser atendido |
 | 409 | Conflito com o estado atual (ex.: nome duplicado, lote em estado que não aceita a operação) |
 | 412 | `If-Match` não corresponde à versão atual do recurso |
+| 415 | `Content-Type` não suportado |
 | 422 | Corpo bem formado, mas viola uma regra de domínio |
 | 428 | Alteração de recurso mutável sem `If-Match` |
 | 429 | Limite de requisições excedido |
+| 500 | Erro inesperado no servidor (o detalhe fica só no log) |
 
 **Recurso de outra organização responde 404, não 403.** Responder 403 confirmaria que o recurso existe, e isso já é vazamento de informação.
+
+**Códigos genéricos.** Valem para qualquer endpoint e não dependem do domínio. Os códigos de negócio (como `LOTE_ENVASADO`) são documentados junto de cada endpoint. A exceção é `UNIDADE_INVALIDA`, que vale para todo campo de quantidade e está descrito no catálogo de unidades (seção 1.11).
+
+| `code` | Status | Quando |
+|---|---|---|
+| `VALIDACAO_FALHOU` | 400 | Um ou mais campos ou parâmetros violam as regras de formato; o detalhe de cada um vem em `errors` |
+| `CORPO_MALFORMADO` | 400 | O corpo não é um JSON válido ou não pode ser lido |
+| `REQUISICAO_INVALIDA` | 400 | Outros problemas da requisição, como parâmetro obrigatório ausente ou valor de tipo errado na URL |
+| `NAO_AUTENTICADO` | 401 | Token ausente, inválido ou expirado |
+| `ACESSO_NEGADO` | 403 | Falta a permissão necessária |
+| `ROTA_NAO_ENCONTRADA` | 404 | A rota não existe (diferente de um recurso não encontrado, que tem código próprio) |
+| `METODO_NAO_SUPORTADO` | 405 | Método HTTP não suportado na rota |
+| `TIPO_DE_RESPOSTA_NAO_SUPORTADO` | 406 | O `Accept` pedido não pode ser atendido |
+| `TIPO_DE_CONTEUDO_NAO_SUPORTADO` | 415 | `Content-Type` não suportado |
+| `ERRO_INTERNO` | 500 | Erro inesperado no servidor |
+
+**Códigos dos erros de validação** (o `code` de cada item de `errors`). Os parâmetros da regra vêm em `params`, com o nome usado na regra: o limite de um `ACIMA_DO_MAXIMO` chega como `{ "value": 200 }`, e o de um `TAMANHO_INVALIDO` como `{ "min": 1, "max": 100 }`.
+
+| `code` | Quando |
+|---|---|
+| `OBRIGATORIO` | Campo ausente, nulo ou em branco |
+| `DEVE_SER_POSITIVO` | Valor precisa ser maior que zero |
+| `NAO_PODE_SER_NEGATIVO` | Valor precisa ser zero ou mais |
+| `TAMANHO_INVALIDO` | Texto ou lista fora do tamanho permitido |
+| `ABAIXO_DO_MINIMO` | Valor abaixo do mínimo |
+| `ACIMA_DO_MAXIMO` | Valor acima do máximo |
+| `FORMATO_INVALIDO` | Texto fora do formato esperado (ex.: e-mail) |
+| `VALOR_INVALIDO` | Valor de tipo errado para o campo (ex.: texto num campo numérico) |
+
+Uma regra de validação nova que não esteja nesta tabela usa o nome da regra em `UPPER_SNAKE_CASE` (por exemplo, `DECIMAL_MIN`) até ganhar um código próprio aqui.
+
+**Códigos do cliente.** Algumas falhas acontecem antes de existir um Problem Details para ler. Os clientes as entregam às telas com os códigos abaixo, no mesmo formato dos códigos da API, para que a interface traduza tudo do mesmo jeito. **O backend nunca devolve estes códigos**, e por isso eles ficam fora do teste de contrato dos códigos de erro. Como o cliente trata os erros: ADR 0017.
+
+| `code` | Status | Quando |
+|---|---|---|
+| `SEM_CONEXAO` | nenhum | A requisição não chegou ao servidor: sem rede, servidor fora do ar ou bloqueio de CORS |
+| `RESPOSTA_INESPERADA` | o da resposta | Resposta de erro fora do formato Problem Details, como a página de erro de um proxy ou gateway; o `correlationId` vem do cabeçalho `X-Correlation-Id`, se houver |
 
 ### 1.7 Concorrência (lock otimista)
 
@@ -152,9 +197,13 @@ Toda grandeza aceita várias unidades, porque cada cervejaria usa o seu padrão.
 | Volume | `L`, `HL`, `ML`, `GAL_US`, `GAL_UK`, `BBL_US` | L |
 | Massa | `G`, `KG`, `OZ`, `LB` | g |
 
-- `G_CM3` é convertido para SG usando a densidade da água a 20 °C como referência.
-- `BBL_US` é o barril de cerveja americano (117,348 L), comum em equipamentos de cervejaria artesanal.
+- `PLATO` e `BRIX` são a mesma escala de sacarose (porcentagem em massa de extrato) e usam a mesma conversão. A leitura crua de um refratômetro depois do início da fermentação é distorcida pelo álcool e não é corrigida pelo catálogo, porque a correção depende do OG do lote (BREW-70).
+- `G_CM3` é convertido para SG usando a densidade da água a 20 °C (0,9982067 g/cm³) como referência.
+- `BBL_US` é o barril de cerveja americano (31 galões US, cerca de 117,348 L), comum em equipamentos de cervejaria artesanal.
 - A API sempre devolve o valor informado (com sua unidade) e o valor canônico. A conversão para a unidade preferida do usuário é feita no cliente.
+- O valor informado é guardado exatamente como chegou. O canônico, quando há conversão, tem 6 casas decimais; na própria unidade canônica, é o valor informado.
+- Unidade de outra grandeza no campo (por exemplo, `G` numa capacidade) responde **422** `UNIDADE_INVALIDA`, com `params` `{ "unidade": "G", "grandeza": "VOLUME" }`. Sinal e faixa do valor são regras de cada campo.
+- Os valores esperados dos casos de teste vêm de referências externas: tabela de extrato da ASBC (Plato), tabela de sacarose do USDA (Brix) e fatores exatos do NIST SP 811 (demais unidades).
 
 ---
 

@@ -1,0 +1,47 @@
+# Atualização automática de dependências (spec 9.6).
+# Versões menores e correções saem agrupadas numa PR por ecossistema; versão maior sai em PR própria, para revisar com calma.
+# Imagens do docker-compose ficam de fora por enquanto: a do PostgreSQL também aparece no profile jooq-codegen
+# e nos testes (ADR 0002), e uma PR que mudasse só o compose deixaria as três divergentes.
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      maven-menores:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        update-types: [major, minor, patch]
+
+  # pnpm workspaces (raiz, apps e packages) pelo pnpm-lock.yaml
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      npm-menores:
+        update-types: [minor, patch]
+
+  # Casca desktop (Tauri), pelo Cargo.lock. Os crates do Tauri andam junto com o @tauri-apps/cli do npm
+  - package-ecosystem: cargo
+    directory: /apps/web/src-tauri
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      cargo-menores:
+        update-types: [minor, patch]

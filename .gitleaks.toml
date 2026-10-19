@@ -1,0 +1,5 @@
+title = "BrewApp"
+
+# Usa todas as regras padrão do gitleaks; regras e allowlists próprias entram aqui quando forem necessárias
+[extend]
+useDefault = true

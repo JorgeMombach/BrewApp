@@ -1,0 +1,29 @@
+/* Estilo mínimo do esqueleto; a biblioteca de componentes é decisão da primeira história com tela de negócio */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.marca {
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+
+.conteudo {
+  padding: 1.5rem;
+}

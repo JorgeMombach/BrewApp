@@ -1,0 +1,100 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "description": "Diário de adega para cervejarias. Convenções em docs/api/design-api.md.",
+    "title": "BrewApp API",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ErroDeValidacao": {
+        "type": "object",
+        "properties": {
+          "campo": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "campo",
+          "code",
+          "params"
+        ]
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "description": "Problem Details (RFC 9457) com código de erro estável; o cliente traduz o code, nunca exibe o title",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Contrato com o cliente"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Mesmo valor do cabeçalho X-Correlation-Id da resposta"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Campos com problema; vazio fora das falhas de validação",
+            "items": {
+              "$ref": "#/components/schemas/ErroDeValidacao"
+            }
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "description": "Só para leitura humana em logs"
+          },
+          "type": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "code",
+          "correlationId",
+          "errors",
+          "params",
+          "status",
+          "title",
+          "type"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  }
+}

@@ -1,0 +1,117 @@
+# BrewApp — contexto para agentes
+
+Diário de adega para cervejarias: acompanhamento estruturado do lote do mosto resfriado ao pré-envase, com registro offline no mobile e comparação de lotes. Projeto pessoal e de portfólio (repositório público). MVP para uso pessoal; modelo de dados preparado para multi-organização (possível SaaS futuro).
+
+## Fontes da verdade (ler antes de propor qualquer coisa)
+
+| Documento | Conteúdo |
+|---|---|
+| `docs/specs/2026-10-03-mvp-diario-adega-design.md` | Spec do MVP: domínio, arquitetura, dados, offline, segurança, testes, lista de ADRs (seção 11) |
+| `docs/api/design-api.md` | Design da API (contrato a seguir): convenções (seção 1), endpoints por módulo (2–7) |
+| `docs/processo/fluxo-de-branches.md` | Branches, commits, merges, rulesets |
+| `docs/processo/definition-of-done.md` | Definition of Done: critérios gerais e por tipo de mudança (espelhada em `.github/pull_request_template.md`) |
+| `docs/sprints/sprint-NN.md` | Plano e resultado de cada sprint |
+
+Divergência entre código e docs: parar e perguntar. Mudança de decisão: atualizar o doc correspondente (e o Jira) junto.
+
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Backend | Java 25, Spring Boot 4, Spring Modulith, Spring Security (Resource Server OIDC), Maven |
+| Dados | PostgreSQL 18, Flyway, jOOQ (schema-first; codegen via Testcontainers no profile `jooq-codegen`; código gerado commitado em `backend/src/main/generated/`, com checagem de divergência) |
+| Auth | Keycloak (OIDC, Authorization Code + PKCE) |
+| Logs | SLF4J + Log4j2 |
+| Web/desktop | React + TypeScript (strict) + Vite + Tauri |
+| Mobile | React Native (Expo), SQLite local |
+| Monorepo | `backend/`, `apps/web/`, `apps/mobile/`, `packages/shared/` (tipos OpenAPI, i18n, catálogo de unidades), `infra/`, `docs/`; pnpm workspaces |
+| IDE do usuário | IntelliJ IDEA Ultimate (suporte a Spring; `.env` carregado pela run configuration) |
+
+## Regras de arquitetura (não negociáveis sem ADR)
+
+- Monolito modular. Módulos: `organizacao`, `recipiente`, `lote`, `adega`, `comparacao`, núcleo `shared`. Um schema Postgres por módulo; nenhum módulo lê tabelas de outro.
+- Direção única de dependência: Adega → Lote, Adega → Recipiente; Comparação → Lote/Adega. Ciclo quebra o build (`ApplicationModules.verify()`).
+- Chamadas síncronas na mesma transação quando preciso (Adega chama Lote: aceita eventos?, registrar inoculação, corrigir instante zero, atualizar situação). Inversão de dependência para ocupação: porta `ConsultaOcupacaoRecipientes` declarada em Recipiente, implementada em Adega.
+- Eventos de domínio (outbox Modulith) só para consumidores que apenas escutam (futuro serviço de Alertas via RabbitMQ).
+- Hexagonal por módulo: `domain/` (Java puro, sem Spring/jOOQ), `application/` (casos de uso + portas), `adapter/in/web`, `adapter/out/persistence`. Records do jOOQ não saem da persistência (ArchUnit).
+- Diário de eventos ≠ Event Sourcing. Eventos são imutáveis (trigger bloqueia UPDATE/DELETE); correção por retificação.
+- Materializações mantidas pela aplicação na mesma transação; triggers só para invariantes técnicas (imutabilidade, `atualizado_em`, auditoria).
+- Tempo relativo à inoculação calculado na consulta, nunca materializado.
+- Exclusão: eventos nunca; cadastros por inativação lógica (`inativado_em`/`inativado_por`, índices únicos parciais); lote por estado; dados técnicos por limpeza física.
+- Multi-tenant: `organization_id` em toda tabela de negócio, FKs compostas, RLS com `SET LOCAL app.organization_id` por transação, app conecta com role não-dono.
+- `java.time.Clock` injetado; nunca `Instant.now()` direto.
+- Testes de persistência só com Postgres real (Testcontainers); nunca H2. Fakes antes de mocks para repositórios.
+
+## Convenções de API (resumo; detalhes em `docs/api/design-api.md` seção 1)
+
+- Base `/api/v1`, recursos em português, plural, kebab-case.
+- Organização só pelo header `X-Organization-Id`; recurso de outra organização responde 404.
+- Toda listagem paginada por keyset (`limite`, `cursor` opaco, `{ itens, proximoCursor }`, sem total). Exceções registradas: `GET /me` e `GET /comparacoes`.
+- Erros: Problem Details (RFC 9457) com `code` estável; o backend não traduz mensagens.
+- Lock otimista: `ETag` + `If-Match` (412/428). Sem `DELETE` de negócio; inativação e mudança de estado são ações `POST`.
+- IDs UUIDv7; eventos com id gerado pelo cliente (idempotência).
+- Unidades: catálogo único (seção 1.11); API devolve valor informado e canônico.
+- Toda rota exige autenticação e declara uma permissão (deny by default).
+
+## Constantes e códigos de erro
+
+| Item | Regra |
+|---|---|
+| Erro de negócio | `throw new ErroDeNegocio(<Enum>.CODIGO, params)`. Um enum por módulo implementando `dev.brewapp.shared.CodigoDeErro` (código = nome da constante, título só para log, `TipoDeErro`). Nunca código como texto solto |
+| Erros genéricos / validação | `dev.brewapp.shared.web.ErroGenerico` e `CodigoDeValidacao`; montagem do corpo só via `Problemas` |
+| Cabeçalhos HTTP | Padrão: `org.springframework.http.HttpHeaders`. Próprios: `dev.brewapp.shared.CabecalhosBrewApp` |
+| Código novo ou renomeado | É mudança de contrato: atualizar `docs/api/design-api.md` (seção 1.6 ou a do endpoint) e `ContratoDeCodigosDeErroTest` juntos |
+| Testes | Códigos e cabeçalhos escritos por extenso de propósito: o teste fixa o contrato |
+| Sem classe global | Nada de `Constantes`/`Utils` global; constante mora perto de quem a usa, no menor escopo. Mensagens de log e de exceções técnicas (config, `IllegalStateException`) ficam no ponto de uso |
+
+## Jira
+
+| Item | Valor |
+|---|---|
+| Site / cloudId | `jorgealvmombach.atlassian.net` / `71623116-f0c1-4f7d-a387-180a4902dbf6` |
+| Projeto | `BREW` (Scrum, team-managed) |
+| Story points | `customfield_10016` |
+| Sprint | `customfield_10020` (Brew-01 = id 3, 05/10–19/10/2026) |
+
+| Epic | Chave |
+|---|---|
+| Fundação técnica | BREW-5 |
+| Identidade e organização | BREW-6 |
+| Recipientes | BREW-7 |
+| Lotes | BREW-8 |
+| Diário de adega | BREW-9 |
+| Mobile e offline | BREW-10 |
+| Comparação de lotes | BREW-11 |
+
+Itens: BREW-12 a BREW-69 (56 histórias, 1 task, 1 bug; 231 pontos estimados, BREW-67 ainda sem estimativa). Criar ou alterar issues somente com aprovação explícita do usuário.
+
+## Git
+
+- Branches: `main` ← `epic/BREW-<n>` ← `feat/BREW-<n>` (histórias/tasks) ou `hotfix/BREW-<n>` (bugs). Chave exata do Jira (`BREW-5`, nunca `BREW-05`).
+- Uma epic e uma branch de trabalho por vez. Trabalho entra na epic por PR; sincronização `main` → epic por merge direto.
+- Somente merge commit (squash/rebase desabilitados) para não duplicar `#time` no Jira. Não reescrever commits com `#time` já enviados.
+- Commit: `BREW-<n> #time <tempo> [Descrição em pt-BR]`. Mensagem começa direto pela chave, sem prefixo de tipo (`feat/BREW-12` na mensagem impede o Smart Commit de registrar o `#time`). O prefixo `feat/`/`hotfix/` fica só no nome da branch.
+- História pronta = mergeada na epic com CI verde.
+- Epic na `main` = release. Versão única do sistema em SemVer 0.x (epic sobe minor, hotfix em produção sobe patch, Dependabot não gera versão), em `backend/pom.xml`, `apps/web/package.json`, `packages/shared/package.json`, `apps/web/src-tauri/tauri.conf.json` e `Cargo.toml`, sem `-SNAPSHOT`. Commit de release direto na epic (`BREW-<epic> [Release X.Y.Z: ...]`, sem `#time`) com versão + seção no `CHANGELOG.md`; tag `vX.Y.Z` no merge commit é a fonte da verdade. Passo a passo em `docs/processo/fluxo-de-branches.md` ("Releases e versionamento").
+- **O agente nunca faz commit, push nem PR.** Deixa as mudanças no working tree e resume o que mudou.
+- Repositório público: nada sensível em commits; `.env` fora do Git; gitleaks no pre-commit.
+
+## Sprint atual (Brew-01)
+
+Objetivo: backend Java 25/Spring Boot 4 subindo localmente com Postgres e Keycloak via docker-compose, com regras de arquitetura verificadas no build.
+
+Backlog original (BREW-12, 13, 14, 21, 15, 16; 17 pontos) concluído em 07/10. Ampliado em 10/10 com o restante da epic BREW-5, nesta ordem:
+
+BREW-68 (1, task README) → BREW-69 (2, bug de mascaramento de exceções) → BREW-20 (5) → BREW-18 (3) → BREW-45 (5) [compromisso] → BREW-17 (3) → BREW-19 (3) → BREW-22 (2) [se der].
+
+Jobs de CI de front: cada história de front (17, 18, 19) adiciona o seu job ao pipeline da BREW-20. Detalhes e decisões em `docs/sprints/sprint-01.md`.
+
+## Como trabalhar neste projeto
+
+- Para cada história: ler os critérios de aceite no Jira, propor um plano técnico em fases numeradas e parar entre cada fase para validação.
+- Ao concluir uma história: checar os critérios de aceite um a um e a Definition of Done (`docs/processo/definition-of-done.md`) item a item, marcando "não se aplica" com motivo; lembrar o usuário de registrar as horas.
+- DoD e template de PR andam juntos: mudar um exige mudar o outro, com decisão registrada no `docs/sprints/sprint-NN.md`.
+- Índice novo ou consulta dependente de índice: `EXPLAIN (ANALYZE, BUFFERS)` + nº de linhas da tabela vai na descrição da PR, não no repositório.
+- Decisão de arquitetura nova ou alterada: propor ADR em `docs/adr/`.
+- Na retro: preencher a seção "Resultado" do `docs/sprints/sprint-NN.md` com pontos concluídos e horas.
+- Review, retro, planning e ampliação de sprint seguem a skill `/cerimonias-sprint` (`.claude/skills/cerimonias-sprint/SKILL.md`).

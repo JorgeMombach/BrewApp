@@ -180,15 +180,18 @@ A API é REST, com o contrato OpenAPI gerado a partir do código do backend. O p
 
 As regras de cálculo que precisam rodar nos dois lados (conversão entre graus Plato e gravidade específica, volumes de CO₂) são implementadas em Java (fonte da verdade) e em TypeScript (pré-visualização no aparelho, inclusive sem rede). Para garantir que não divirjam, **as duas implementações são testadas contra o mesmo arquivo de casos de teste.**
 
+Como o contrato e os tipos são versionados, onde ficam os casos de teste e como a CI verifica a divergência: ADR 0013.
+
 ---
 
 ## 5. Dados e persistência
 
 ### 5.1 Princípios
 
-- **Um schema do PostgreSQL por módulo.** Nenhum módulo lê as tabelas de outro. É isso que torna a extração de serviços viável.
-- **O banco é a fonte da verdade do schema.** O Flyway aplica as migrations, e o jOOQ gera as classes a partir do banco real (um PostgreSQL em container durante o build). O código gerado não é versionado.
-- **Migration aplicada nunca é editada;** correções são sempre novas migrations. As versões usam data e hora, para evitar colisões entre módulos.
+- **Um schema do PostgreSQL por módulo.** Nenhum módulo lê as tabelas de outro. É isso que torna a extração de serviços viável. Módulos sem dados próprios (a Comparação, que só lê pelas interfaces do Lote e da Adega) não têm schema.
+- **O banco é a fonte da verdade do schema.** O Flyway aplica as migrations, e o jOOQ gera as classes a partir do banco real (um PostgreSQL em container, num profile do Maven acionado quando uma migration muda). O código gerado é versionado, para que o projeto compile logo após o clone e a pull request mostre o impacto de cada migration. Em troca, uma checagem de divergência regenera o código e falha se ele não bater com o que está versionado. As classes geradas de cada schema ficam dentro da camada de persistência do próprio módulo, e as fronteiras entre módulos impedem que um use as tabelas do outro.
+- **Migration aplicada nunca é editada;** correções são sempre novas migrations. Cada módulo tem a sua pasta de migrations, e as versões usam data e hora (por exemplo, `V20261007_1400__cria_schema_lote.sql`), para evitar colisões entre módulos. Duas migrations nunca têm a mesma data e hora, mesmo em pastas diferentes.
+- **Duas roles no banco.** A role de migração é dona dos schemas e das tabelas e só é usada pelo Flyway. A aplicação conecta com outra role, que lê, insere e altera dados, mas não cria nem altera estruturas e não exclui linhas: a exclusão física é exceção (seção 5.5) e é concedida tabela a tabela, na migration que precisar dela.
 
 ### 5.2 Modelagem dos eventos
 
@@ -277,10 +280,12 @@ O mecanismo de sincronização é um módulo TypeScript independente, com rede e
 
 ## 7. Logs e observabilidade
 
-- O código registra logs apenas por meio da fachada **SLF4J**; o **Log4j2** é a implementação. A troca de implementação não afeta nenhuma classe.
+- O código registra logs apenas por meio da fachada **SLF4J**; o **Log4j2** é a implementação. A troca de implementação não afeta nenhuma classe. O Logback fica proibido no build, e uma regra de arquitetura impede o uso direto da API do Log4j2 fora da infraestrutura de log.
 - **Desenvolvimento:** todas as consultas SQL são registradas com os valores preenchidos, prontas para copiar e executar.
-- **Produção:** apenas consultas lentas são registradas, com o tempo de execução e **sem os valores**, para não expor dados sensíveis.
-- Logs estruturados em JSON em produção, com um **identificador de correlação** por requisição, inclusive nas sincronizações vindas do celular.
+- **Produção:** apenas consultas lentas são registradas, com o tempo de execução e **sem os valores**, para não expor dados sensíveis. O limite começa em 500 ms e é configurável. O driver do PostgreSQL também deixa de incluir nas exceções o detalhe do erro, que costuma trazer valores de registros (por exemplo, o e-mail que violou uma chave única).
+- Logs estruturados em JSON em produção, no formato Elastic Common Schema (ECS). Em desenvolvimento, o log é texto.
+- Cada requisição tem um **identificador de correlação**, inclusive nas sincronizações vindas do celular. Ele vem do cliente ou é gerado pelo servidor, aparece em toda linha de log da requisição e volta na resposta, tanto no cabeçalho quanto no corpo dos erros.
+- **Mascaramento:** todo evento de log passa por um mascaramento antes de ser escrito. Tokens, credenciais e segredos são sempre ocultados, e e-mails ficam só com a primeira letra e o domínio. A exceção é o SQL registrado em desenvolvimento, que mantém o e-mail para continuar executável, mas ainda oculta os tokens. As exceções anexadas ao log (mensagem, causas e stack trace) passam pelas mesmas regras, com o e-mail mascarado em todos os ambientes. O mascaramento é a segunda linha de defesa: ele não reconhece dados pessoais em texto livre, como nomes. Por isso a primeira defesa continua sendo não colocar dado pessoal em mensagens de log nem de exceção.
 - Métricas via Actuator e Micrometer, com Prometheus e Grafana opcionais no ambiente local.
 
 ---
@@ -296,7 +301,9 @@ O app suporta **português (Brasil), espanhol e inglês** desde o início.
 - **Unidades de medida** são uma preferência do usuário, independente do idioma.
 - Conteúdo digitado pelos usuários não é traduzido.
 
-**Onde as traduções vivem:** no MVP, em arquivos JSON versionados junto com o código, embutidos nos aplicativos (o que resolve o offline). As chaves são tipadas, e o CI falha se faltar uma tradução em algum idioma. Quando houver pessoas que não são desenvolvedoras editando traduções, elas migram para o banco, com uma tela de administração e publicação em CDN. A convenção de nomes já está preparada para essa migração.
+**Onde as traduções vivem:** no MVP, em arquivos JSON versionados junto com o código, embutidos nos aplicativos (o que resolve o offline). As chaves são tipadas, e o CI falha se faltar uma tradução em algum idioma. Quando houver pessoas que não são desenvolvedoras editando traduções, elas migram para o banco, com uma tela de administração. Num primeiro passo, o banco vira a fonte e os mesmos arquivos são exportados para o build, o que mantém o offline e as conferências do CI. A publicação em CDN fica para quando for preciso corrigir um texto sem um novo build. A convenção de nomes já está preparada para essa migração.
+
+A convenção de nomes das chaves, o que leva chave e como o compilador, o lint, o CI e os testes do backend garantem as traduções estão no ADR 0012.
 
 ---
 
@@ -375,14 +382,14 @@ Um documento curto de modelo de ameaças listará os ativos (receitas, dados pes
 
 - Todo código que depende do tempo recebe o relógio por injeção, o que mantém os testes determinísticos.
 - Meta de cobertura alta **no domínio e nos casos de uso**, sem meta global de vaidade. Mutation testing no domínio como medida adicional da qualidade dos testes.
-- Pipelines de CI separados por área do monorepo.
+- Pipelines de CI separados por área do monorepo: um job por área, acionado por filtro de caminho, num workflow com um único check obrigatório.
 - Formatação automática aplicada **apenas nos arquivos alterados**.
 
 ---
 
 ## 11. Decisões a registrar (ADRs)
 
-Cada decisão abaixo será registrada em um ADR próprio:
+Cada decisão abaixo será registrada em um ADR próprio, com o número do item. Decisões que surgirem depois entram no fim da lista. O índice, com o status de cada ADR, fica em `docs/adr/README.md`.
 
 1. Monolito modular com Spring Modulith e extração planejada de serviços.
 2. jOOQ com abordagem *schema-first* em vez de JPA.
@@ -400,6 +407,7 @@ Cada decisão abaixo será registrada em um ADR próprio:
 14. Log4j2 por trás da fachada SLF4J, com política de log de SQL por ambiente.
 15. Exceções à regra de paginação: vínculos no `GET /me` (coleção pequena por natureza) e comparação de lotes (resposta limitada por agregação em vez de paginação).
 16. Direção única de dependência entre módulos, com chamadas síncronas na mesma transação e inversão de dependência para a ocupação dos tanques.
+17. Cliente HTTP tipado pelo contrato da API, com toda falha entregue às telas como um único tipo de erro (decisão surgida na BREW-17).
 
 ---
 

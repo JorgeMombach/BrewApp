@@ -1,0 +1,78 @@
+# Configuração comum a todos os perfis.
+# Valores de ambiente vêm só de variáveis de ambiente, sem valor padrão: se faltar alguma, a aplicação não sobe.
+# Em desenvolvimento, as variáveis vêm do .env da raiz (run configuration do IntelliJ ou exportadas no terminal).
+spring:
+  application:
+    name: brewapp
+  datasource:
+    url: ${BREWAPP_DB_URL}
+    # Role da aplicação: sem ser dona das tabelas e sem DDL, para que o RLS seja aplicado (spec 9.3)
+    username: ${BREWAPP_DB_APP_USER}
+    password: ${BREWAPP_DB_APP_PASSWORD}
+  flyway:
+    # Só o Flyway usa a role dona das tabelas; a URL é a mesma do datasource
+    user: ${BREWAPP_DB_OWNER_USER}
+    password: ${BREWAPP_DB_OWNER_PASSWORD}
+    # Schema do histórico do Flyway, criado por ele mesmo. Os schemas dos módulos são criados pelas migrations,
+    # em db/migration/<modulo>/ (o Flyway varre as subpastas de db/migration)
+    schemas: flyway
+    # Nome de arquivo fora do padrão quebra a subida em vez de a migration ser ignorada em silêncio
+    validate-migration-naming: true
+    placeholders:
+      # Role que recebe os grants nos schemas dos módulos
+      appRole: ${BREWAPP_DB_APP_USER}
+  jooq:
+    sql-dialect: postgres
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Emissor e destinatário validados nos tokens (spec 9.1)
+          issuer-uri: ${BREWAPP_OAUTH_ISSUER_URI}
+          audiences: ${BREWAPP_OAUTH_AUDIENCE}
+
+server:
+  port: ${BREWAPP_SERVER_PORT}
+
+logging:
+  charset:
+    # Sem isso, o console do Windows usa cp1252 e quebra os acentos; no container Linux já é UTF-8
+    console: UTF-8
+  pattern:
+    # Identificador de correlação da requisição (FiltroDeCorrelacao) em cada linha do console.
+    # %notEmpty: fora de requisição (subida, tarefas agendadas) não sobra um "[]" vazio
+    correlation: "%notEmpty{[%X{correlationId}] }"
+  structured:
+    json:
+      # Mascara a mensagem e o stack trace da exceção quando o log sai em JSON (prod); no texto, é o %xwExMascarado
+      customizer: dev.brewapp.shared.logging.MascaramentoDaExcecaoEmJson
+  level:
+    # Logo e "dica do dia" do jOOQ na primeira consulta: ruído, principalmente no JSON de produção
+    org.jooq.Constants: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # /actuator/health é a única rota pública (spec 9.2)
+        include: health
+
+springdoc:
+  # Documento OpenAPI (/v3/api-docs) e Swagger UI só no perfil dev (spec 4.5); em produção as rotas não existem
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+  # Ordem estável das chaves: o documento exportado para packages/shared não muda sem mudança de contrato
+  writer-with-order-by-keys: true
+  # Sem isso, toda operação ganharia as respostas do TratadorGlobalDeErros com o ProblemDetail do Spring,
+  # que não tem code, params nem correlationId; os erros usam o schema ProblemDetails (ConfiguracaoDoContratoDaApi)
+  override-with-generic-response: false
+  # Mantém os schemas que nenhuma operação referencia ainda (ex.: ProblemDetails antes dos primeiros endpoints):
+  # eles fazem parte do contrato e geram tipos no packages/shared
+  remove-broken-reference-definitions: false
+
+brewapp:
+  cors:
+    # Origens separadas por vírgula (spec 9.5)
+    allowed-origins: ${BREWAPP_CORS_ALLOWED_ORIGINS}
