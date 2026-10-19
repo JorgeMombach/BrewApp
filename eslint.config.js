@@ -42,4 +42,32 @@ export default defineConfig(
       globals: globals.browser,
     },
   },
+  {
+    // Nenhum texto fixo na interface (Definition of Done): todo texto visível ou lido pelo leitor de tela vem do t().
+    // Os testes ficam de fora, porque procuram os textos já traduzidos
+    files: ['apps/web/src/**/*.tsx'],
+    ignores: ['**/*.test.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXText[value=/\\S/]',
+          message: 'Texto fixo na interface: use uma chave de tradução com o t().',
+        },
+        {
+          selector: ':matches(JSXElement, JSXFragment) > JSXExpressionContainer > :matches(Literal, TemplateLiteral)',
+          message: 'Texto fixo na interface: use uma chave de tradução com o t().',
+        },
+        {
+          // Literal direto (aria-label="...") ou entre chaves (aria-label={'...'}); o argumento do t() não conta
+          selector: [
+            'JSXAttribute[name.name=/^(aria-label|aria-description|title|alt|placeholder)$/] > Literal',
+            'JSXAttribute[name.name=/^(aria-label|aria-description|title|alt|placeholder)$/] > JSXExpressionContainer > :matches(Literal, TemplateLiteral)',
+          ].join(', '),
+          message:
+            'Texto fixo em atributo lido pelo usuário ou pelo leitor de tela: use uma chave de tradução com o t().',
+        },
+      ],
+    },
+  },
 );

@@ -42,7 +42,7 @@ Os detalhes e os motivos de cada decisão estão na spec do MVP e nos ADRs (link
 | `backend/` | API em Spring Boot, migrations e código gerado pelo jOOQ |
 | `apps/web/` | App web em React; a casca desktop (Tauri) fica em `apps/web/src-tauri/` |
 | `apps/mobile/` | App mobile (em breve) |
-| `packages/shared/` | Tipos da API e catálogo de unidades compartilhados entre os apps; as traduções entram em breve |
+| `packages/shared/` | Tipos da API, catálogo de unidades e traduções (pt-BR, es e en) compartilhados entre os apps |
 | `infra/` | PostgreSQL e Keycloak para desenvolvimento local, via Docker Compose |
 | `docs/` | Spec, design da API, processo, ADRs e planos de sprint |
 

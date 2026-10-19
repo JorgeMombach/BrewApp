@@ -301,7 +301,9 @@ O app suporta **português (Brasil), espanhol e inglês** desde o início.
 - **Unidades de medida** são uma preferência do usuário, independente do idioma.
 - Conteúdo digitado pelos usuários não é traduzido.
 
-**Onde as traduções vivem:** no MVP, em arquivos JSON versionados junto com o código, embutidos nos aplicativos (o que resolve o offline). As chaves são tipadas, e o CI falha se faltar uma tradução em algum idioma. Quando houver pessoas que não são desenvolvedoras editando traduções, elas migram para o banco, com uma tela de administração e publicação em CDN. A convenção de nomes já está preparada para essa migração.
+**Onde as traduções vivem:** no MVP, em arquivos JSON versionados junto com o código, embutidos nos aplicativos (o que resolve o offline). As chaves são tipadas, e o CI falha se faltar uma tradução em algum idioma. Quando houver pessoas que não são desenvolvedoras editando traduções, elas migram para o banco, com uma tela de administração. Num primeiro passo, o banco vira a fonte e os mesmos arquivos são exportados para o build, o que mantém o offline e as conferências do CI. A publicação em CDN fica para quando for preciso corrigir um texto sem um novo build. A convenção de nomes já está preparada para essa migração.
+
+A convenção de nomes das chaves, o que leva chave e como o compilador, o lint, o CI e os testes do backend garantem as traduções estão no ADR 0012.
 
 ---
 

@@ -1,10 +1,12 @@
-import { textos } from '../textos';
+import { useTranslation } from 'react-i18next';
 
 export function PaginaInicial() {
+  const { t } = useTranslation();
+
   return (
     <section>
-      <h1>{textos.paginaInicial.titulo}</h1>
-      <p>{textos.paginaInicial.descricao}</p>
+      <h1>{t('app.paginaInicial.titulo')}</h1>
+      <p>{t('app.paginaInicial.descricao')}</p>
     </section>
   );
 }
