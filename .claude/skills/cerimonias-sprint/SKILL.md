@@ -34,6 +34,8 @@ Coletar sem opinar ainda:
 - **Jira:** itens da sprint com `summary`, `issuetype`, `status`, `customfield_10016` (pontos), `timespent`, `parent`. Status de categoria Done (no BREW, "Production") significa mergeado na epic, ou seja, pronto pela Definition of Done.
 - **Git:** `git log` das branches de epic envolvidas desde o início da sprint, merges de PR e mensagens com `#time`. Comparar as horas dos commits com o `timespent` do Jira: diferença costuma ser commit com prefixo `feat/` na mensagem (o Smart Commit não registra).
 - **Build:** rodar `./mvnw -B verify` em `backend/` (precisa do Docker ligado; se estiver desligado, pedir para ligar em vez de pular). Se houver apps de front, rodar também lint, typecheck e testes deles.
+- **Alertas de segurança:** conferir os alertas abertos de code scanning (CodeQL) e do Dependabot na branch da epic, na aba Security do GitHub. O ruleset só bloqueia alertas na PR para a `main`, então um alerta aberto numa PR para a epic passa sem travar nada. Sem `gh` na máquina, pedir ao Jorge um print ou a lista da aba Security. Cada alerta aberto vira bug, ou é dispensado com justificativa registrada em "Decisões durante o sprint".
+- **Formatação contra a `main`:** quando a epic for para a `main` na sprint, rodar `./mvnw -B spotless:check -Dformatacao.base=origin/main` em `backend/`, porque a PR para a `main` confere todos os arquivos alterados na epic, não só os da última PR.
 - **Memória do projeto:** reler os pontos de atenção e pendências anotados (arquivos `project-*` da memória) para checar se algum venceu nesta sprint.
 
 ## Fase 2: review

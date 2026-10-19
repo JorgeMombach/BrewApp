@@ -83,11 +83,16 @@ class TratadorGlobalDeErrosTest {
         String corpoInvalido = """
                 {"nome": " ", "capacidade": {"valor": -5}}""";
 
-        esperarProblema(executar(post("/teste/validacao").contentType(MediaType.APPLICATION_JSON).content(corpoInvalido)),
-                400, "VALIDACAO_FALHOU")
+        esperarProblema(
+                        executar(post("/teste/validacao")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpoInvalido)),
+                        400,
+                        "VALIDACAO_FALHOU")
                 .andExpect(jsonPath("$.errors.length()").value(2))
                 .andExpect(jsonPath("$.errors[?(@.campo == 'nome')].code").value("OBRIGATORIO"))
-                .andExpect(jsonPath("$.errors[?(@.campo == 'capacidade.valor')].code").value("DEVE_SER_POSITIVO"));
+                .andExpect(jsonPath("$.errors[?(@.campo == 'capacidade.valor')].code")
+                        .value("DEVE_SER_POSITIVO"));
     }
 
     @Test
@@ -105,14 +110,22 @@ class TratadorGlobalDeErrosTest {
 
     @Test
     void corpoMalformadoVira400() throws Exception {
-        esperarProblema(executar(post("/teste/validacao").contentType(MediaType.APPLICATION_JSON).content("{\"nome\": ")),
-                400, "CORPO_MALFORMADO");
+        esperarProblema(
+                executar(post("/teste/validacao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\": ")),
+                400,
+                "CORPO_MALFORMADO");
     }
 
     @Test
     void contentTypeNaoSuportadoVira415() throws Exception {
-        esperarProblema(executar(post("/teste/validacao").contentType(MediaType.TEXT_PLAIN).content("texto")),
-                415, "TIPO_DE_CONTEUDO_NAO_SUPORTADO");
+        esperarProblema(
+                executar(post("/teste/validacao")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("texto")),
+                415,
+                "TIPO_DE_CONTEUDO_NAO_SUPORTADO");
     }
 
     @Test
@@ -151,7 +164,8 @@ class TratadorGlobalDeErrosTest {
         return mockMvc.perform(mockHttpServletRequestBuilder.with(jwt()));
     }
 
-    private static ResultActions esperarProblema(ResultActions resultActions, int status, String code) throws Exception {
+    private static ResultActions esperarProblema(ResultActions resultActions, int status, String code)
+            throws Exception {
         return resultActions
                 .andExpect(status().is(status))
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
@@ -187,11 +201,9 @@ class TratadorGlobalDeErrosTest {
         }
     }
 
-    record Capacidade(@Positive BigDecimal valor) {
-    }
+    record Capacidade(@Positive BigDecimal valor) {}
 
-    record CorpoDeTeste(@NotBlank String nome, @Valid Capacidade capacidade) {
-    }
+    record CorpoDeTeste(@NotBlank String nome, @Valid Capacidade capacidade) {}
 
     /** Aninhado na classe de teste: fica fora do component scan e só entra neste contexto pelo @Import. */
     @RestController
@@ -214,12 +226,10 @@ class TratadorGlobalDeErrosTest {
         }
 
         @PostMapping("/validacao")
-        void validacao(@Valid @RequestBody CorpoDeTeste corpoDeTeste) {
-        }
+        void validacao(@Valid @RequestBody CorpoDeTeste corpoDeTeste) {}
 
         @GetMapping("/parametro")
-        void parametro(@RequestParam @Max(200) int limite) {
-        }
+        void parametro(@RequestParam @Max(200) int limite) {}
 
         @GetMapping("/erro-inesperado")
         void erroInesperado() {

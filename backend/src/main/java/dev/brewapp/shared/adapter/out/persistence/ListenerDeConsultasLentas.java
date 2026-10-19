@@ -40,7 +40,11 @@ class ListenerDeConsultasLentas implements ExecuteListener {
         Duration duracao = Duration.ofNanos(System.nanoTime() - inicioEmNanos);
         if (duracao.compareTo(limite) >= 0) {
             // sql() é o texto enviado ao driver: com bind parameters (padrão do jOOQ), os valores ficam como "?"
-            LOGGER.warn("Consulta lenta: {} ms (limite {} ms): {}", duracao.toMillis(), limite.toMillis(), executeContext.sql());
+            LOGGER.warn(
+                    "Consulta lenta: {} ms (limite {} ms): {}",
+                    duracao.toMillis(),
+                    limite.toMillis(),
+                    executeContext.sql());
         }
     }
 }

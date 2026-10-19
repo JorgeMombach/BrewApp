@@ -14,15 +14,18 @@ class PoliticaDeMascaramentoTest {
     private static final String LOGGER_DO_JOOQ = "org.jooq.tools.LoggerListener";
     private static final String LOGGER_DA_APLICACAO = "dev.brewapp.qualquer.Classe";
 
-    private final PoliticaDeMascaramento politicaDeMascaramento = PoliticaDeMascaramento.criar(" " + LOGGER_DO_JOOQ + " , ");
+    private final PoliticaDeMascaramento politicaDeMascaramento =
+            PoliticaDeMascaramento.criar(" " + LOGGER_DO_JOOQ + " , ");
 
     @Test
     void mascaraAMensagemJaFormatadaComOsParametros() {
-        LogEvent logEvent = evento(LOGGER_DA_APLICACAO, new ParameterizedMessage("usuário {} com {}", "fulano@exemplo.com", "Bearer abc"));
+        LogEvent logEvent = evento(
+                LOGGER_DA_APLICACAO, new ParameterizedMessage("usuário {} com {}", "fulano@exemplo.com", "Bearer abc"));
 
         LogEvent logEventMascarado = politicaDeMascaramento.rewrite(logEvent);
 
-        assertThat(logEventMascarado.getMessage().getFormattedMessage()).isEqualTo("usuário f***@exemplo.com com Bearer ***");
+        assertThat(logEventMascarado.getMessage().getFormattedMessage())
+                .isEqualTo("usuário f***@exemplo.com com Bearer ***");
     }
 
     @Test
@@ -39,17 +42,21 @@ class PoliticaDeMascaramentoTest {
 
         LogEvent logEventMascarado = politicaDeMascaramento.rewrite(logEvent);
 
-        assertThat(logEventMascarado.getContextData().<String>getValue("usuario")).isEqualTo("f***@exemplo.com");
-        assertThat(logEventMascarado.getContextData().<String>getValue("correlationId")).isEqualTo("rastro-1");
+        assertThat(logEventMascarado.getContextData().<String>getValue("usuario"))
+                .isEqualTo("f***@exemplo.com");
+        assertThat(logEventMascarado.getContextData().<String>getValue("correlationId"))
+                .isEqualTo("rastro-1");
     }
 
     @Test
     void loggerComEmailVisivelAindaMascaraTokens() {
-        LogEvent logEvent = evento(LOGGER_DO_JOOQ, new ParameterizedMessage("select 'fulano@exemplo.com', 'Bearer abc'"));
+        LogEvent logEvent =
+                evento(LOGGER_DO_JOOQ, new ParameterizedMessage("select 'fulano@exemplo.com', 'Bearer abc'"));
 
         LogEvent logEventMascarado = politicaDeMascaramento.rewrite(logEvent);
 
-        assertThat(logEventMascarado.getMessage().getFormattedMessage()).isEqualTo("select 'fulano@exemplo.com', 'Bearer ***'");
+        assertThat(logEventMascarado.getMessage().getFormattedMessage())
+                .isEqualTo("select 'fulano@exemplo.com', 'Bearer ***'");
     }
 
     @Test
@@ -57,7 +64,8 @@ class PoliticaDeMascaramentoTest {
         PoliticaDeMascaramento politicaPadrao = PoliticaDeMascaramento.criar(null);
         LogEvent logEvent = evento(LOGGER_DO_JOOQ, new ParameterizedMessage("select 'fulano@exemplo.com'"));
 
-        assertThat(politicaPadrao.rewrite(logEvent).getMessage().getFormattedMessage()).isEqualTo("select 'f***@exemplo.com'");
+        assertThat(politicaPadrao.rewrite(logEvent).getMessage().getFormattedMessage())
+                .isEqualTo("select 'f***@exemplo.com'");
     }
 
     @Test

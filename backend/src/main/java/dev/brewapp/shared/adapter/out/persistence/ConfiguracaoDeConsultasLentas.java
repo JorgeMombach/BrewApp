@@ -17,7 +17,8 @@ import org.springframework.context.annotation.Configuration;
 class ConfiguracaoDeConsultasLentas {
 
     @Bean
-    ExecuteListenerProvider listenerDeConsultasLentas(@Value("${brewapp.sql.limite-de-consulta-lenta}") Duration limite) {
+    ExecuteListenerProvider listenerDeConsultasLentas(
+            @Value("${brewapp.sql.limite-de-consulta-lenta}") Duration limite) {
         return new DefaultExecuteListenerProvider(new ListenerDeConsultasLentas(limite));
     }
 }

@@ -22,24 +22,33 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @Component
 class RespostaDeErroDeSeguranca implements AuthenticationEntryPoint, AccessDeniedHandler {
 
-    private final AuthenticationEntryPoint bearerTokenAuthenticationEntryPoint = new BearerTokenAuthenticationEntryPoint();
+    private final AuthenticationEntryPoint bearerTokenAuthenticationEntryPoint =
+            new BearerTokenAuthenticationEntryPoint();
     private final AccessDeniedHandler bearerTokenAccessDeniedHandler = new BearerTokenAccessDeniedHandler();
     private final HandlerExceptionResolver handlerExceptionResolver;
 
-    RespostaDeErroDeSeguranca(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
+    RespostaDeErroDeSeguranca(
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Override
-    public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
-                         AuthenticationException authenticationException) throws IOException, ServletException {
+    public void commence(
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse,
+            AuthenticationException authenticationException)
+            throws IOException, ServletException {
         bearerTokenAuthenticationEntryPoint.commence(httpServletRequest, httpServletResponse, authenticationException);
-        handlerExceptionResolver.resolveException(httpServletRequest, httpServletResponse, null, authenticationException);
+        handlerExceptionResolver.resolveException(
+                httpServletRequest, httpServletResponse, null, authenticationException);
     }
 
     @Override
-    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
-                       AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse,
+            AccessDeniedException accessDeniedException)
+            throws IOException, ServletException {
         bearerTokenAccessDeniedHandler.handle(httpServletRequest, httpServletResponse, accessDeniedException);
         handlerExceptionResolver.resolveException(httpServletRequest, httpServletResponse, null, accessDeniedException);
     }

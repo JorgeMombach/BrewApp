@@ -66,9 +66,7 @@ class MascaramentoNosLogsTest {
 
         LOGGER.info("Mensagem sem dado sensível");
 
-        assertThat(capturedOutput.getOut())
-                .contains("senha=***")
-                .doesNotContain("vazou");
+        assertThat(capturedOutput.getOut()).contains("senha=***").doesNotContain("vazou");
     }
 
     @Test
@@ -80,7 +78,8 @@ class MascaramentoNosLogsTest {
 
     @Test
     void excecaoComSegredoSaiMascarada(CapturedOutput capturedOutput) {
-        LOGGER.error("Erro inesperado", new IllegalStateException("select * from adega.evento where senha = 'segredo'"));
+        LOGGER.error(
+                "Erro inesperado", new IllegalStateException("select * from adega.evento where senha = 'segredo'"));
 
         assertThat(capturedOutput.getOut())
                 .contains("java.lang.IllegalStateException: select * from adega.evento where senha = '***'")
@@ -105,13 +104,13 @@ class MascaramentoNosLogsTest {
 
         assertThat(linhaQueContem(capturedOutput, "Caused by:"))
                 .isEqualTo("Caused by: java.lang.IllegalArgumentException: usuário f***@exemplo.com com senha=***");
-        assertThat(capturedOutput.getOut())
-                .doesNotContain("fulano@exemplo.com")
-                .doesNotContain("senha=abc");
+        assertThat(capturedOutput.getOut()).doesNotContain("fulano@exemplo.com").doesNotContain("senha=abc");
     }
 
     private static String linhaQueContem(CapturedOutput capturedOutput, String trecho) {
-        return capturedOutput.getOut().lines()
+        return capturedOutput
+                .getOut()
+                .lines()
                 .filter(linha -> linha.contains(trecho))
                 .findFirst()
                 .orElseThrow();

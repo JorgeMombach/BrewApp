@@ -12,6 +12,5 @@ public final class CabecalhosBrewApp {
     /** Identificador de correlação da requisição; reaproveitado se enviado, gerado pelo servidor se não. */
     public static final String X_CORRELATION_ID = "X-Correlation-Id";
 
-    private CabecalhosBrewApp() {
-    }
+    private CabecalhosBrewApp() {}
 }

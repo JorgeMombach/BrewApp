@@ -12,7 +12,8 @@ record PropriedadesCors(List<String> allowedOrigins) {
             throw new IllegalStateException("brewapp.cors.allowed-origins precisa ter ao menos uma origem");
         }
         if (allowedOrigins.contains("*")) {
-            throw new IllegalStateException("brewapp.cors.allowed-origins não aceita '*': CORS é restrito às origens conhecidas");
+            throw new IllegalStateException(
+                    "brewapp.cors.allowed-origins não aceita '*': CORS é restrito às origens conhecidas");
         }
         allowedOrigins = List.copyOf(allowedOrigins);
     }

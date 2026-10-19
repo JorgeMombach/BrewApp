@@ -42,7 +42,8 @@ class LogDeSqlEmProducaoTest {
 
     @Test
     void consultaLentaEhLogadaComOTempoESemOsValores(CapturedOutput capturedOutput) {
-        dslContext.select(
+        dslContext
+                .select(
                         DSL.field("pg_sleep({0}::float8)", DSL.val(0.6)),
                         DSL.field("length({0}::text)", DSL.val(VALOR_SENSIVEL)))
                 .fetch();
@@ -55,16 +56,17 @@ class LogDeSqlEmProducaoTest {
 
     @Test
     void consultaRapidaNaoEhLogada(CapturedOutput capturedOutput) {
-        dslContext.select(DSL.field("length({0}::text)", DSL.val(VALOR_SENSIVEL))).fetch();
+        dslContext
+                .select(DSL.field("length({0}::text)", DSL.val(VALOR_SENSIVEL)))
+                .fetch();
 
-        assertThat(capturedOutput.getOut())
-                .doesNotContain("Consulta lenta")
-                .doesNotContain(VALOR_SENSIVEL);
+        assertThat(capturedOutput.getOut()).doesNotContain("Consulta lenta").doesNotContain(VALOR_SENSIVEL);
     }
 
     @Test
     void excecaoDoBancoNaoTrazODetailComValores() throws SQLException {
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement()) {
             assertThatThrownBy(() -> statement.execute(blocoQueFalhaComDetail()))
                     .isInstanceOf(SQLException.class)
                     .hasMessageContaining("falha de teste")

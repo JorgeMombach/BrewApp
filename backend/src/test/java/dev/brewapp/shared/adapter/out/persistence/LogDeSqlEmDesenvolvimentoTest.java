@@ -45,7 +45,9 @@ class LogDeSqlEmDesenvolvimentoTest {
 
     @Test
     void todoSqlEhLogadoComOsValoresPreenchidos(CapturedOutput capturedOutput) {
-        dslContext.select(DSL.field("length({0}::text)", DSL.val("valor-visivel"))).fetch();
+        dslContext
+                .select(DSL.field("length({0}::text)", DSL.val("valor-visivel")))
+                .fetch();
 
         assertThat(capturedOutput.getOut()).contains("'valor-visivel'");
     }
@@ -53,7 +55,8 @@ class LogDeSqlEmDesenvolvimentoTest {
     /** Decisão da BREW-16: no dev, o e-mail fica visível só no SQL do jOOQ; tokens são mascarados mesmo ali. */
     @Test
     void sqlDoJooqMantemOEmailMasMascaraTokens(CapturedOutput capturedOutput) {
-        dslContext.select(
+        dslContext
+                .select(
                         DSL.field("length({0}::text)", DSL.val("fulano@exemplo.com")),
                         DSL.field("length({0}::text)", DSL.val("Bearer abc.def")))
                 .fetch();
@@ -81,20 +84,20 @@ class LogDeSqlEmDesenvolvimentoTest {
     void foraDoJooqOEmailEhMascaradoTambemNoDev(CapturedOutput capturedOutput) {
         LoggerFactory.getLogger(LogDeSqlEmDesenvolvimentoTest.class).info("usuário fulano@exemplo.com");
 
-        assertThat(capturedOutput.getOut())
-                .contains("usuário f***@exemplo.com")
-                .doesNotContain("fulano@exemplo.com");
+        assertThat(capturedOutput.getOut()).contains("usuário f***@exemplo.com").doesNotContain("fulano@exemplo.com");
     }
 
     @Test
     void listenerDeConsultasLentasNaoEhRegistrado() {
-        assertThat(applicationContext.getBeansOfType(ConfiguracaoDeConsultasLentas.class)).isEmpty();
+        assertThat(applicationContext.getBeansOfType(ConfiguracaoDeConsultasLentas.class))
+                .isEmpty();
     }
 
     /** Contraprova do teste de produção: sem logServerErrorDetail=false, o Detail chega na mensagem. */
     @Test
     void excecaoDoBancoTrazODetail() throws SQLException {
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+        try (Connection connection = dataSource.getConnection();
+                Statement statement = connection.createStatement()) {
             assertThatThrownBy(() -> statement.execute(LogDeSqlEmProducaoTest.blocoQueFalhaComDetail()))
                     .isInstanceOf(SQLException.class)
                     .hasMessageContaining("fulano@exemplo.com");

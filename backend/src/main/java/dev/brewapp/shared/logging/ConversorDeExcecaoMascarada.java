@@ -27,7 +27,8 @@ public final class ConversorDeExcecaoMascarada extends LogEventPatternConverter 
 
     /** Assinatura exigida pelo Log4j2; as opções são as mesmas do {@code %xwEx} (ex.: {@code %xwExMascarado{short}}). */
     public static ConversorDeExcecaoMascarada newInstance(Configuration configuration, String[] options) {
-        return new ConversorDeExcecaoMascarada(ExtendedWhitespaceThrowablePatternConverter.newInstance(configuration, options));
+        return new ConversorDeExcecaoMascarada(
+                ExtendedWhitespaceThrowablePatternConverter.newInstance(configuration, options));
     }
 
     @Override

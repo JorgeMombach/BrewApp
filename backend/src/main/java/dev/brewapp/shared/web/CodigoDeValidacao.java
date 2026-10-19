@@ -21,7 +21,6 @@ import java.util.Optional;
  * Renomear uma constante muda o contrato com os clientes.
  */
 public enum CodigoDeValidacao {
-
     OBRIGATORIO(NotNull.class, NotBlank.class, NotEmpty.class),
     DEVE_SER_POSITIVO(Positive.class),
     NAO_PODE_SER_NEGATIVO(PositiveOrZero.class),

@@ -47,9 +47,11 @@ final class EmissorDeTokensDeTeste {
             RSAKey rsaKey = gerarChave();
             HttpServer httpServer = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
             EmissorDeTokensDeTeste emissorDeTokensDeTeste = new EmissorDeTokensDeTeste(httpServer, rsaKey);
-            httpServer.createContext(CAMINHO_DO_REALM + "/.well-known/openid-configuration",
+            httpServer.createContext(
+                    CAMINHO_DO_REALM + "/.well-known/openid-configuration",
                     httpExchange -> responderJson(httpExchange, emissorDeTokensDeTeste.discovery()));
-            httpServer.createContext(CAMINHO_DO_REALM + "/protocol/openid-connect/certs",
+            httpServer.createContext(
+                    CAMINHO_DO_REALM + "/protocol/openid-connect/certs",
                     httpExchange -> responderJson(httpExchange, new JWKSet(rsaKey.toPublicJWK()).toString()));
             httpServer.start();
             return emissorDeTokensDeTeste;
@@ -75,7 +77,11 @@ final class EmissorDeTokensDeTeste {
     }
 
     String tokenDeOutroEmissor() {
-        return assinar(rsaKey, "http://localhost:1/realms/outro", AUDIENCE, Instant.now().plus(VALIDADE));
+        return assinar(
+                rsaKey,
+                "http://localhost:1/realms/outro",
+                AUDIENCE,
+                Instant.now().plus(VALIDADE));
     }
 
     String tokenExpirado() {
@@ -89,8 +95,7 @@ final class EmissorDeTokensDeTeste {
 
     private String discovery() {
         return """
-                {"issuer":"%s","jwks_uri":"%s/protocol/openid-connect/certs","subject_types_supported":["public"]}"""
-                .formatted(issuer, issuer);
+                {"issuer":"%s","jwks_uri":"%s/protocol/openid-connect/certs","subject_types_supported":["public"]}""".formatted(issuer, issuer);
     }
 
     private static String assinar(RSAKey rsaKeyDeAssinatura, String issuer, String audience, Instant expiracao) {
@@ -101,7 +106,9 @@ final class EmissorDeTokensDeTeste {
                 .issueTime(Date.from(expiracao.minus(VALIDADE)))
                 .expirationTime(Date.from(expiracao))
                 .build();
-        JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKeyDeAssinatura.getKeyID()).build();
+        JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256)
+                .keyID(rsaKeyDeAssinatura.getKeyID())
+                .build();
         SignedJWT signedJwt = new SignedJWT(jwsHeader, jwtClaimsSet);
         try {
             signedJwt.sign(new RSASSASigner(rsaKeyDeAssinatura));

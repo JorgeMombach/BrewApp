@@ -10,8 +10,7 @@ import java.util.Base64;
  */
 final class JwtFalsoDeTeste {
 
-    private JwtFalsoDeTeste() {
-    }
+    private JwtFalsoDeTeste() {}
 
     static String gerar() {
         Base64.Encoder base64Url = Base64.getUrlEncoder().withoutPadding();

@@ -62,7 +62,8 @@ class FiltroDeCorrelacaoTest {
         String correlationIdGerado = mvcResult.getResponse().getHeader(CABECALHO);
         assertThat(correlationIdGerado).isNotNull();
         assertThat(UUID.fromString(correlationIdGerado)).isNotNull();
-        assertThat(mvcResult.getResponse().getContentAsString()).contains("\"correlationId\":\"" + correlationIdGerado + "\"");
+        assertThat(mvcResult.getResponse().getContentAsString())
+                .contains("\"correlationId\":\"" + correlationIdGerado + "\"");
     }
 
     @Test
@@ -71,7 +72,8 @@ class FiltroDeCorrelacaoTest {
         String longoDemais = "a".repeat(65);
 
         for (String correlationIdInvalido : new String[] {comQuebraDeLinha, longoDemais, "com espaço", ""}) {
-            MvcResult mvcResult = mockMvc.perform(get(ROTA_PROTEGIDA).header(CABECALHO, correlationIdInvalido)).andReturn();
+            MvcResult mvcResult = mockMvc.perform(get(ROTA_PROTEGIDA).header(CABECALHO, correlationIdInvalido))
+                    .andReturn();
 
             String correlationIdDaResposta = mvcResult.getResponse().getHeader(CABECALHO);
             assertThat(correlationIdDaResposta).isNotEqualTo(correlationIdInvalido);

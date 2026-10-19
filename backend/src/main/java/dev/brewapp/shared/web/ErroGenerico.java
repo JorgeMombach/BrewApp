@@ -5,7 +5,6 @@ package dev.brewapp.shared.web;
  * tabela "Códigos genéricos"). Renomear uma constante muda o contrato com os clientes.
  */
 public enum ErroGenerico {
-
     VALIDACAO_FALHOU("Falha de validação"),
     CORPO_MALFORMADO("Corpo da requisição malformado"),
     REQUISICAO_INVALIDA("Requisição inválida"),

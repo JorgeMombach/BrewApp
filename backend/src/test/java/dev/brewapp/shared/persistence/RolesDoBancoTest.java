@@ -65,14 +65,11 @@ class RolesDoBancoTest {
 
     @Test
     void aplicacaoConectaComRoleSemPrivilegiosEspeciais() {
-        Map<String, Object> roleDaConexao = comoAplicacao()
-                .sql("""
+        Map<String, Object> roleDaConexao = comoAplicacao().sql("""
                         SELECT rolname, rolsuper, rolcreaterole, rolcreatedb, rolbypassrls
                         FROM pg_roles
                         WHERE rolname = current_user
-                        """)
-                .query()
-                .singleRow();
+                        """).query().singleRow();
 
         assertThat(roleDaConexao)
                 .containsEntry("rolname", ROLE_DA_APLICACAO)
@@ -92,9 +89,8 @@ class RolesDoBancoTest {
 
     @Test
     void aplicacaoNaoCriaSchemas() {
-        assertNegadoPorPrivilegio(() -> comoAplicacao()
-                .sql("CREATE SCHEMA schema_indevido")
-                .update());
+        assertNegadoPorPrivilegio(
+                () -> comoAplicacao().sql("CREATE SCHEMA schema_indevido").update());
     }
 
     /** Tabela criada pela role de migração, como faria uma migration: vale o ALTER DEFAULT PRIVILEGES do schema. */
@@ -105,8 +101,12 @@ class RolesDoBancoTest {
 
         @BeforeEach
         void criarTabelaComoMigracao() {
-            comoMigracao().sql("CREATE TABLE " + TABELA + " (id integer PRIMARY KEY, descricao text)").update();
-            comoMigracao().sql("INSERT INTO " + TABELA + " VALUES (1, 'original')").update();
+            comoMigracao()
+                    .sql("CREATE TABLE " + TABELA + " (id integer PRIMARY KEY, descricao text)")
+                    .update();
+            comoMigracao()
+                    .sql("INSERT INTO " + TABELA + " VALUES (1, 'original')")
+                    .update();
         }
 
         @AfterEach
@@ -119,9 +119,12 @@ class RolesDoBancoTest {
             var aplicacao = comoAplicacao();
 
             aplicacao.sql("INSERT INTO " + TABELA + " VALUES (2, 'inserido')").update();
-            aplicacao.sql("UPDATE " + TABELA + " SET descricao = 'alterado' WHERE id = 1").update();
+            aplicacao
+                    .sql("UPDATE " + TABELA + " SET descricao = 'alterado' WHERE id = 1")
+                    .update();
 
-            var descricoes = aplicacao.sql("SELECT descricao FROM " + TABELA + " ORDER BY id")
+            var descricoes = aplicacao
+                    .sql("SELECT descricao FROM " + TABELA + " ORDER BY id")
                     .query(String.class)
                     .list();
             assertThat(descricoes).containsExactly("alterado", "inserido");
@@ -130,7 +133,8 @@ class RolesDoBancoTest {
         /** Exclusão física é exceção (spec 5.5): DELETE é concedido tabela a tabela, na migration que precisar. */
         @Test
         void aplicacaoNaoExcluiLinhasSemGrantExplicito() {
-            assertNegadoPorPrivilegio(() -> comoAplicacao().sql("DELETE FROM " + TABELA).update());
+            assertNegadoPorPrivilegio(
+                    () -> comoAplicacao().sql("DELETE FROM " + TABELA).update());
         }
 
         @Test
@@ -138,7 +142,8 @@ class RolesDoBancoTest {
             assertNegadoPorPrivilegio(() -> comoAplicacao()
                     .sql("ALTER TABLE " + TABELA + " ADD COLUMN coluna_indevida text")
                     .update());
-            assertNegadoPorPrivilegio(() -> comoAplicacao().sql("DROP TABLE " + TABELA).update());
+            assertNegadoPorPrivilegio(
+                    () -> comoAplicacao().sql("DROP TABLE " + TABELA).update());
         }
     }
 

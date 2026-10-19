@@ -82,25 +82,33 @@ class TratadorGlobalDeErros extends ResponseEntityExceptionHandler {
      * trocamos o corpo padrão do Spring pelo formato da API.
      */
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception exception, Object body, HttpHeaders httpHeaders,
-                                                             HttpStatusCode httpStatusCode, WebRequest webRequest) {
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception exception,
+            Object body,
+            HttpHeaders httpHeaders,
+            HttpStatusCode httpStatusCode,
+            WebRequest webRequest) {
         ProblemDetail problemDetail = switch (exception) {
-            case MethodArgumentNotValidException methodArgumentNotValidException -> Problemas.falhaDeValidacao(
-                    httpStatusCode, errosDosCampos(methodArgumentNotValidException.getBindingResult().getFieldErrors()));
-            case HandlerMethodValidationException handlerMethodValidationException -> Problemas.falhaDeValidacao(
-                    httpStatusCode, errosDosParametros(handlerMethodValidationException));
+            case MethodArgumentNotValidException methodArgumentNotValidException ->
+                Problemas.falhaDeValidacao(
+                        httpStatusCode,
+                        errosDosCampos(methodArgumentNotValidException
+                                .getBindingResult()
+                                .getFieldErrors()));
+            case HandlerMethodValidationException handlerMethodValidationException ->
+                Problemas.falhaDeValidacao(httpStatusCode, errosDosParametros(handlerMethodValidationException));
             case HttpMessageNotReadableException httpMessageNotReadableException ->
-                    Problemas.criar(httpStatusCode, ErroGenerico.CORPO_MALFORMADO);
+                Problemas.criar(httpStatusCode, ErroGenerico.CORPO_MALFORMADO);
             case NoResourceFoundException noResourceFoundException ->
-                    Problemas.criar(httpStatusCode, ErroGenerico.ROTA_NAO_ENCONTRADA);
+                Problemas.criar(httpStatusCode, ErroGenerico.ROTA_NAO_ENCONTRADA);
             case NoHandlerFoundException noHandlerFoundException ->
-                    Problemas.criar(httpStatusCode, ErroGenerico.ROTA_NAO_ENCONTRADA);
+                Problemas.criar(httpStatusCode, ErroGenerico.ROTA_NAO_ENCONTRADA);
             case HttpRequestMethodNotSupportedException httpRequestMethodNotSupportedException ->
-                    Problemas.criar(httpStatusCode, ErroGenerico.METODO_NAO_SUPORTADO);
+                Problemas.criar(httpStatusCode, ErroGenerico.METODO_NAO_SUPORTADO);
             case HttpMediaTypeNotSupportedException httpMediaTypeNotSupportedException ->
-                    Problemas.criar(httpStatusCode, ErroGenerico.TIPO_DE_CONTEUDO_NAO_SUPORTADO);
+                Problemas.criar(httpStatusCode, ErroGenerico.TIPO_DE_CONTEUDO_NAO_SUPORTADO);
             case HttpMediaTypeNotAcceptableException httpMediaTypeNotAcceptableException ->
-                    Problemas.criar(httpStatusCode, ErroGenerico.TIPO_DE_RESPOSTA_NAO_SUPORTADO);
+                Problemas.criar(httpStatusCode, ErroGenerico.TIPO_DE_RESPOSTA_NAO_SUPORTADO);
             default -> problemaGenerico(exception, httpStatusCode);
         };
         return super.handleExceptionInternal(exception, problemDetail, httpHeaders, httpStatusCode, webRequest);
@@ -122,12 +130,16 @@ class TratadorGlobalDeErros extends ResponseEntityExceptionHandler {
     }
 
     /** Validação de parâmetros do método (@RequestParam, @PathVariable etc.) e de corpos validados em lista. */
-    private static List<Map<String, Object>> errosDosParametros(HandlerMethodValidationException handlerMethodValidationException) {
+    private static List<Map<String, Object>> errosDosParametros(
+            HandlerMethodValidationException handlerMethodValidationException) {
         return handlerMethodValidationException.getParameterValidationResults().stream()
                 .flatMap(parameterValidationResult -> parameterValidationResult.getResolvableErrors().stream()
                         .map(messageSourceResolvable -> messageSourceResolvable instanceof FieldError fieldError
                                 ? erroDeValidacao(fieldError.getField(), violacaoDoCampo(fieldError))
-                                : erroDeValidacao(parameterValidationResult.getMethodParameter().getParameterName(),
+                                : erroDeValidacao(
+                                        parameterValidationResult
+                                                .getMethodParameter()
+                                                .getParameterName(),
                                         violacaoDoParametro(parameterValidationResult, messageSourceResolvable))))
                 .toList();
     }
@@ -138,8 +150,8 @@ class TratadorGlobalDeErros extends ResponseEntityExceptionHandler {
                 : Optional.empty();
     }
 
-    private static Optional<ConstraintViolation<?>> violacaoDoParametro(ParameterValidationResult parameterValidationResult,
-                                                                       MessageSourceResolvable messageSourceResolvable) {
+    private static Optional<ConstraintViolation<?>> violacaoDoParametro(
+            ParameterValidationResult parameterValidationResult, MessageSourceResolvable messageSourceResolvable) {
         try {
             return Optional.of(parameterValidationResult.unwrap(messageSourceResolvable, ConstraintViolation.class));
         } catch (IllegalArgumentException illegalArgumentException) {
@@ -148,7 +160,8 @@ class TratadorGlobalDeErros extends ResponseEntityExceptionHandler {
     }
 
     /** Sem restrição de Bean Validation, o erro é de conversão de tipo (ex.: texto num campo numérico). */
-    private static Map<String, Object> erroDeValidacao(String campo, Optional<ConstraintViolation<?>> constraintViolation) {
+    private static Map<String, Object> erroDeValidacao(
+            String campo, Optional<ConstraintViolation<?>> constraintViolation) {
         String code = constraintViolation
                 .map(TratadorGlobalDeErros::codigoDaRestricao)
                 .orElse(CodigoDeValidacao.VALOR_INVALIDO.name());

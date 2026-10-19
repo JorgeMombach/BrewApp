@@ -17,8 +17,7 @@ final class MascaradorDeDadosSensiveis {
             Pattern.compile("(?i)\\b(bearer|basic)(\\s+)[A-Za-z0-9\\-._~+/]+=*");
 
     /** JWT solto (cabeçalho e payload em Base64URL começam com "eyJ", que é '{"'). */
-    private static final Pattern JWT =
-            Pattern.compile("\\beyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*");
+    private static final Pattern JWT = Pattern.compile("\\beyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*");
 
     /**
      * Pares chave/valor de segredos, em texto (senha=x), JSON ("password": "x"), SQL (senha = 'x') ou query string
@@ -32,8 +31,7 @@ final class MascaradorDeDadosSensiveis {
     private static final Pattern EMAIL =
             Pattern.compile("\\b([A-Za-z0-9])[A-Za-z0-9._%+-]*@([A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,})\\b");
 
-    private MascaradorDeDadosSensiveis() {
-    }
+    private MascaradorDeDadosSensiveis() {}
 
     /**
      * Tokens e segredos são sempre mascarados. O e-mail pode ficar visível só onde a política permite

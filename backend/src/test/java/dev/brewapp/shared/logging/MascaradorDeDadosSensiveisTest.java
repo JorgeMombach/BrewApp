@@ -46,7 +46,8 @@ class MascaradorDeDadosSensiveisTest {
     void jwtSoltoEhMascarado() {
         assertThat(JWT).startsWith("eyJ");
 
-        assertThat(MascaradorDeDadosSensiveis.mascarar("token recebido: " + JWT, true)).isEqualTo("token recebido: ***");
+        assertThat(MascaradorDeDadosSensiveis.mascarar("token recebido: " + JWT, true))
+                .isEqualTo("token recebido: ***");
     }
 
     @ParameterizedTest
@@ -60,9 +61,11 @@ class MascaradorDeDadosSensiveisTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-            "insert into organizacao.usuario (email) values ('fulano@exemplo.com')",
-            "select 'fulano@exemplo.com'"})
+    @ValueSource(
+            strings = {
+                "insert into organizacao.usuario (email) values ('fulano@exemplo.com')",
+                "select 'fulano@exemplo.com'"
+            })
     void emailFicaVisivelQuandoAPoliticaPermite(String texto) {
         assertThat(MascaradorDeDadosSensiveis.mascarar(texto, false)).isEqualTo(texto);
     }
@@ -70,7 +73,10 @@ class MascaradorDeDadosSensiveisTest {
     @ParameterizedTest
     @MethodSource("tokensESegredos")
     void tokensESegredosSaoMascaradosMesmoComEmailVisivel(String texto) {
-        assertThat(MascaradorDeDadosSensiveis.mascarar(texto, false)).contains("***").doesNotContain("abc").doesNotContain(JWT);
+        assertThat(MascaradorDeDadosSensiveis.mascarar(texto, false))
+                .contains("***")
+                .doesNotContain("abc")
+                .doesNotContain(JWT);
     }
 
     private static Stream<String> tokensESegredos() {
@@ -78,11 +84,13 @@ class MascaradorDeDadosSensiveisTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-            "Lote IPA-2610-A inoculado em FV-01",
-            "Consulta lenta: 623 ms (limite 500 ms): select length(?::text)",
-            "token inválido",
-            "senha"})
+    @ValueSource(
+            strings = {
+                "Lote IPA-2610-A inoculado em FV-01",
+                "Consulta lenta: 623 ms (limite 500 ms): select length(?::text)",
+                "token inválido",
+                "senha"
+            })
     void textoSemDadoSensivelFicaIgual(String texto) {
         assertThat(MascaradorDeDadosSensiveis.mascarar(texto, true)).isEqualTo(texto);
     }

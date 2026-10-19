@@ -36,7 +36,8 @@ class MascaramentoDaExcecaoEmJsonTest {
         IllegalStateException illegalStateException =
                 new IllegalStateException("select * from adega.evento where senha = 'segredo'");
 
-        String json = jsonWriter.writeToString(evento("dev.brewapp.qualquer.Classe", "Erro inesperado", illegalStateException));
+        String json = jsonWriter.writeToString(
+                evento("dev.brewapp.qualquer.Classe", "Erro inesperado", illegalStateException));
 
         assertThat(json)
                 .contains("\"type\":\"java.lang.IllegalStateException\"")
@@ -61,7 +62,8 @@ class MascaramentoDaExcecaoEmJsonTest {
         IllegalArgumentException causa = new IllegalArgumentException("usuário fulano@exemplo.com com senha=abc");
         RuntimeException runtimeException = new RuntimeException("Falha ao salvar", causa);
 
-        String json = jsonWriter.writeToString(evento("dev.brewapp.qualquer.Classe", "Erro inesperado", runtimeException));
+        String json =
+                jsonWriter.writeToString(evento("dev.brewapp.qualquer.Classe", "Erro inesperado", runtimeException));
 
         assertThat(json)
                 .contains("\"message\":\"Falha ao salvar\"")

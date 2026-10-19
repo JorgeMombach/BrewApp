@@ -12,6 +12,5 @@ import org.springframework.test.context.ActiveProfiles;
 class BrewAppApplicationTest {
 
     @Test
-    void contextoSobe() {
-    }
+    void contextoSobe() {}
 }

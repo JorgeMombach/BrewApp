@@ -30,8 +30,9 @@ class FiltroDeCorrelacao extends OncePerRequestFilter {
     private static final Pattern FORMATO_ACEITO = Pattern.compile("[A-Za-z0-9._-]{1,64}");
 
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain)
+            throws ServletException, IOException {
         String correlationId = correlationIdDaRequisicao(httpServletRequest);
         MDC.put(CHAVE_NO_MDC, correlationId);
         // Antes da cadeia: a resposta pode ser confirmada (commit) lá dentro, e o cabeçalho precisa ir junto
@@ -46,7 +47,8 @@ class FiltroDeCorrelacao extends OncePerRequestFilter {
 
     private static String correlationIdDaRequisicao(HttpServletRequest httpServletRequest) {
         String correlationIdRecebido = httpServletRequest.getHeader(CabecalhosBrewApp.X_CORRELATION_ID);
-        if (correlationIdRecebido != null && FORMATO_ACEITO.matcher(correlationIdRecebido).matches()) {
+        if (correlationIdRecebido != null
+                && FORMATO_ACEITO.matcher(correlationIdRecebido).matches()) {
             return correlationIdRecebido;
         }
         return UUID.randomUUID().toString();

@@ -56,8 +56,7 @@ class SegurancaTest {
 
     @Test
     void healthEhPublico() throws Exception {
-        mockMvc.perform(get("/actuator/health"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
     }
 
     @Test
@@ -73,7 +72,8 @@ class SegurancaTest {
     @Test
     void tokenValidoPassaPelaSeguranca() throws Exception {
         // Rota inexistente: passar da segurança significa chegar ao 404, e não parar no 401
-        mockMvc.perform(get(ROTA_PROTEGIDA).header(HttpHeaders.AUTHORIZATION, bearer(emissorDeTokensDeTeste.tokenValido())))
+        mockMvc.perform(get(ROTA_PROTEGIDA)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(emissorDeTokensDeTeste.tokenValido())))
                 .andExpect(status().isNotFound());
     }
 
@@ -103,11 +103,13 @@ class SegurancaTest {
         MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest("GET", ROTA_PROTEGIDA);
         MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
 
-        respostaDeErroDeSeguranca.handle(mockHttpServletRequest, mockHttpServletResponse, new AccessDeniedException("sem permissão"));
+        respostaDeErroDeSeguranca.handle(
+                mockHttpServletRequest, mockHttpServletResponse, new AccessDeniedException("sem permissão"));
 
         assertThat(mockHttpServletResponse.getStatus()).isEqualTo(403);
         assertThat(mockHttpServletResponse.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-        assertThat(mockHttpServletResponse.getHeader(HttpHeaders.WWW_AUTHENTICATE)).startsWith("Bearer");
+        assertThat(mockHttpServletResponse.getHeader(HttpHeaders.WWW_AUTHENTICATE))
+                .startsWith("Bearer");
         assertThat(mockHttpServletResponse.getContentAsString()).contains("\"code\":\"ACESSO_NEGADO\"");
     }
 
@@ -116,7 +118,9 @@ class SegurancaTest {
         mockMvc.perform(options(ROTA_PROTEGIDA)
                         .header(HttpHeaders.ORIGIN, ORIGEM_PERMITIDA)
                         .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PATCH")
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Authorization, If-Match, X-Organization-Id"))
+                        .header(
+                                HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS,
+                                "Authorization, If-Match, X-Organization-Id"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGEM_PERMITIDA));
     }

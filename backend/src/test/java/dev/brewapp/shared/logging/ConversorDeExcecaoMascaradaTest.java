@@ -64,7 +64,8 @@ class ConversorDeExcecaoMascaradaTest {
     void preservaOStackTrace() {
         String excecaoRenderizada = renderizar(evento(LOGGER_DA_APLICACAO, new IllegalStateException("falha")));
 
-        assertThat(excecaoRenderizada).contains("at " + ConversorDeExcecaoMascaradaTest.class.getName() + ".preservaOStackTrace");
+        assertThat(excecaoRenderizada)
+                .contains("at " + ConversorDeExcecaoMascaradaTest.class.getName() + ".preservaOStackTrace");
     }
 
     @Test

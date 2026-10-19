@@ -21,7 +21,11 @@ import org.apache.logging.log4j.util.StringMap;
  * Ela é mascarada já renderizada, em cada layout: ConversorDeExcecaoMascarada (texto) e MascaramentoDaExcecaoEmJson
  * (JSON), com o e-mail mascarado mesmo nos loggers com e-mail visível.
  */
-@Plugin(name = "PoliticaDeMascaramento", category = Core.CATEGORY_NAME, elementType = "rewritePolicy", printObject = true)
+@Plugin(
+        name = "PoliticaDeMascaramento",
+        category = Core.CATEGORY_NAME,
+        elementType = "rewritePolicy",
+        printObject = true)
 public final class PoliticaDeMascaramento implements RewritePolicy {
 
     /** Loggers cujas mensagens mantêm o e-mail visível (tokens e segredos continuam mascarados). */
@@ -33,7 +37,8 @@ public final class PoliticaDeMascaramento implements RewritePolicy {
 
     /** @param loggersComEmailVisivel nomes completos de loggers, separados por vírgula; vazio por padrão */
     @PluginFactory
-    public static PoliticaDeMascaramento criar(@PluginAttribute("loggersComEmailVisivel") String loggersComEmailVisivel) {
+    public static PoliticaDeMascaramento criar(
+            @PluginAttribute("loggersComEmailVisivel") String loggersComEmailVisivel) {
         Set<String> nomesDosLoggers = loggersComEmailVisivel == null
                 ? Set.of()
                 : Arrays.stream(loggersComEmailVisivel.split(","))

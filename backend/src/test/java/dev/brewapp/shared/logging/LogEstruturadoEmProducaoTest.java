@@ -55,13 +55,15 @@ class LogEstruturadoEmProducaoTest {
     /** O tipo continua o da exceção original: a máscara age só na mensagem e no stack trace (MascaramentoDaExcecaoEmJson). */
     @Test
     void excecaoComSegredoSaiMascaradaNoErrorDoEcs(CapturedOutput capturedOutput) {
-        LOGGER.error("Erro inesperado", new IllegalStateException("select * from adega.evento where senha = 'segredo'"));
+        LOGGER.error(
+                "Erro inesperado", new IllegalStateException("select * from adega.evento where senha = 'segredo'"));
 
         assertThat(linhaQueContem(capturedOutput, "Erro inesperado"))
                 .startsWith("{")
                 .contains("\"error\":{\"type\":\"java.lang.IllegalStateException\"")
                 .contains("\"message\":\"select * from adega.evento where senha = '***'\"")
-                .contains("\"stack_trace\":\"java.lang.IllegalStateException: select * from adega.evento where senha = '***'")
+                .contains(
+                        "\"stack_trace\":\"java.lang.IllegalStateException: select * from adega.evento where senha = '***'")
                 .doesNotContain("segredo");
     }
 
@@ -87,7 +89,9 @@ class LogEstruturadoEmProducaoTest {
     }
 
     private static String linhaQueContem(CapturedOutput capturedOutput, String trecho) {
-        return capturedOutput.getOut().lines()
+        return capturedOutput
+                .getOut()
+                .lines()
                 .filter(linha -> linha.contains(trecho))
                 .findFirst()
                 .orElseThrow();
