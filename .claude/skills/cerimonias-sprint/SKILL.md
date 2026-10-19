@@ -97,6 +97,7 @@ Quando o compromisso termina antes do prazo, a recomendação padrão é **ampli
 - Listar os arquivos alterados (normalmente `docs/sprints/sprint-NN.md`, o novo `sprint-NN.md` e o `CLAUDE.md`).
 - Sugerir a mensagem de commit no padrão `BREW-<n> [Descrição em pt-BR]`, usando a chave do primeiro item da próxima fila de trabalho. Sem `#time`, salvo se o Jorge quiser contabilizar o tempo da cerimônia.
 - Lembrar o Jorge de iniciar a sprint no Jira, colando o objetivo no campo de meta.
+- **Epic concluída na sprint:** ela vira release na `main`. Seguir o passo a passo de "Releases e versionamento" em `docs/processo/fluxo-de-branches.md`: propor a versão nova, atualizar os arquivos de versão, escrever a seção do `CHANGELOG.md` a partir dos itens da epic no Jira e sugerir o commit de release direto na epic. A PR para a `main`, a tag, a GitHub Release e a epic em Done no Jira ficam com o Jorge (a epic em Done pode ser feita pelo conector, com aprovação). Os registros da cerimônia também podem ir direto na epic.
 
 ## Modelo de `docs/sprints/sprint-NN.md`
 

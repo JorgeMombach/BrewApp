@@ -13,7 +13,7 @@
 
     <groupId>dev.brewapp</groupId>
     <artifactId>brewapp-backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>BrewApp Backend</name>
     <description>Diário de adega para cervejarias: monolito modular (Spring Modulith)</description>
 

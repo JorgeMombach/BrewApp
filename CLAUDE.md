@@ -92,6 +92,7 @@ Itens: BREW-12 a BREW-69 (56 histórias, 1 task, 1 bug; 231 pontos estimados, BR
 - Somente merge commit (squash/rebase desabilitados) para não duplicar `#time` no Jira. Não reescrever commits com `#time` já enviados.
 - Commit: `BREW-<n> #time <tempo> [Descrição em pt-BR]`. Mensagem começa direto pela chave, sem prefixo de tipo (`feat/BREW-12` na mensagem impede o Smart Commit de registrar o `#time`). O prefixo `feat/`/`hotfix/` fica só no nome da branch.
 - História pronta = mergeada na epic com CI verde.
+- Epic na `main` = release. Versão única do sistema em SemVer 0.x (epic sobe minor, hotfix em produção sobe patch, Dependabot não gera versão), em `backend/pom.xml`, `apps/web/package.json`, `packages/shared/package.json`, `apps/web/src-tauri/tauri.conf.json` e `Cargo.toml`, sem `-SNAPSHOT`. Commit de release direto na epic (`BREW-<epic> [Release X.Y.Z: ...]`, sem `#time`) com versão + seção no `CHANGELOG.md`; tag `vX.Y.Z` no merge commit é a fonte da verdade. Passo a passo em `docs/processo/fluxo-de-branches.md` ("Releases e versionamento").
 - **O agente nunca faz commit, push nem PR.** Deixa as mudanças no working tree e resume o que mudou.
 - Repositório público: nada sensível em commits; `.env` fora do Git; gitleaks no pre-commit.
 

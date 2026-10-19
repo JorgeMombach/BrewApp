@@ -57,6 +57,52 @@ Essas pull requests não seguem o padrão de nome de branch nem de commit (não 
 
 Uma história, task ou bug está **pronto** quando é mergeado na branch da epic com a CI verde e atende aos critérios da [Definition of Done](definition-of-done.md), que é a referência completa. A chegada da epic à `main` é uma entrega de release, não uma condição para concluir histórias no sprint.
 
+## Releases e versionamento
+
+Cada epic que chega à `main` é uma release. O sistema tem **uma versão só**, compartilhada pelo backend, pelo app web e desktop e pelo pacote compartilhado, porque eles são entregues juntos.
+
+### Número da versão
+
+A versão segue o [Versionamento Semântico](https://semver.org/lang/pt-BR/). Enquanto o MVP estiver em construção, o projeto fica na série 0.x:
+
+| Mudança na `main` | O que sobe | Exemplo |
+|---|---|---|
+| Merge de uma epic | *minor* | 0.1.0 → 0.2.0 |
+| Correção de bug em produção (`hotfix/BREW-<n>` direto na `main`) | *patch* | 0.2.0 → 0.2.1 |
+| Atualização do Dependabot | nada; entra no changelog da próxima release | |
+
+A 1.0.0 fica para quando o MVP estiver em uso de verdade.
+
+O número aparece no `pom.xml` do backend, no `package.json` do app web e do pacote compartilhado, e na configuração do Tauri (`tauri.conf.json` e `Cargo.toml`). Ele só muda no commit de release: entre uma release e outra, os arquivos mostram a última versão entregue, sem sufixo `-SNAPSHOT`. A versão da API (`/api/v1`) é outra coisa: só muda numa quebra de contrato.
+
+A fonte da verdade é a tag do Git (`v0.1.0`), criada no merge commit da epic na `main`.
+
+### Changelog
+
+O `CHANGELOG.md` da raiz tem uma seção por versão, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). O texto é escrito para pessoas: o que a versão entrega, agrupado em *Adicionado*, *Alterado*, *Corrigido* e *Segurança*, com a chave das histórias entre parênteses. A seção é escrita na hora da release, a partir dos itens da epic no Jira.
+
+### Passo a passo da release
+
+1. **Na branch da epic**, com todas as histórias mergeadas e a CI verde:
+   - atualizar a versão nos arquivos citados acima;
+   - escrever a seção da versão no `CHANGELOG.md`, com a data do merge;
+   - commitar direto na epic, com a chave da epic e sem `#time`: `BREW-5 [Release 0.1.0: versão e changelog]`.
+2. **Abrir a pull request da epic para a `main`.** O título é a versão e o nome da epic (`0.1.0: Fundação técnica`), e a descrição é a seção do changelog. Merge commit com o check `CI concluída` verde.
+3. **Criar a tag no merge commit** e enviá-la:
+
+   ```bash
+   git checkout main
+   git pull
+   git tag -a v0.1.0 -m "BrewApp 0.1.0"
+   git push origin v0.1.0
+   ```
+
+4. **Publicar a GitHub Release** a partir da tag, com o mesmo texto do changelog.
+5. **Fechar a epic no Jira** (status Done).
+6. **Criar a branch da próxima epic** a partir da `main` atualizada.
+
+Num hotfix em produção, os passos 1 a 4 acontecem na própria branch `hotfix/BREW-<n>`, subindo o *patch*.
+
 ## Commits
 
 Padrão: `BREW-<n> #time <tempo> [Descrição em pt-BR]`
@@ -82,5 +128,5 @@ A mensagem começa direto pela chave do Jira, sem o prefixo de tipo. Com `feat/B
   | `protecao-epics` | `epic/**` | Bloqueia force push e exclusão; **não** exige pull request, para permitir a sincronização direta com a `main` |
 
 - A regra "exigir histórico linear" fica desligada em ambos, porque é incompatível com merge commit.
-- Por convenção, as branches de trabalho entram na epic sempre por pull request, mesmo sem o GitHub exigir.
+- Por convenção, as branches de trabalho entram na epic sempre por pull request, mesmo sem o GitHub exigir. As exceções são o commit de release e os registros das cerimônias do sprint, que só mexem em documentação e versão e vão direto na epic.
 - Deploy apenas no merge para a `main`.
