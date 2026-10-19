@@ -71,7 +71,7 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 | Site / cloudId | `jorgealvmombach.atlassian.net` / `71623116-f0c1-4f7d-a387-180a4902dbf6` |
 | Projeto | `BREW` (Scrum, team-managed) |
 | Story points | `customfield_10016` |
-| Sprint | `customfield_10020` (Brew-01 = id 3, 05/10–19/10/2026) |
+| Sprint | `customfield_10020` (Brew-01 = id 3, 05/10–19/10/2026, encerrada; Brew-02 = id 4, 20/10–02/11/2026) |
 
 | Epic | Chave |
 |---|---|
@@ -83,7 +83,7 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 | Mobile e offline | BREW-10 |
 | Comparação de lotes | BREW-11 |
 
-Itens: BREW-12 a BREW-69 (56 histórias, 1 task, 1 bug; 231 pontos estimados, BREW-67 ainda sem estimativa). Criar ou alterar issues somente com aprovação explícita do usuário.
+Itens: BREW-12 a BREW-70 (57 histórias, 1 task, 1 bug; 233 pontos estimados depois da reestimativa da BREW-24 de 3 para 5; BREW-67 e BREW-70 ainda sem estimativa). Epic BREW-5 concluída e entregue na release 0.1.0 (19/10/2026). Criar ou alterar issues somente com aprovação explícita do usuário.
 
 ## Git
 
@@ -96,15 +96,15 @@ Itens: BREW-12 a BREW-69 (56 histórias, 1 task, 1 bug; 231 pontos estimados, BR
 - **O agente nunca faz commit, push nem PR.** Deixa as mudanças no working tree e resume o que mudou.
 - Repositório público: nada sensível em commits; `.env` fora do Git; gitleaks no pre-commit.
 
-## Sprint atual (Brew-01)
+## Sprint atual (Brew-02)
 
-Objetivo: backend Java 25/Spring Boot 4 subindo localmente com Postgres e Keycloak via docker-compose, com regras de arquitetura verificadas no build.
+Objetivo: usuário entra pela web e pelo desktop, é reconhecido pelo backend, e todo acesso a dados fica autorizado por permissão e isolado por organização no banco.
 
-Backlog original (BREW-12, 13, 14, 21, 15, 16; 17 pontos) concluído em 07/10. Ampliado em 10/10 com o restante da epic BREW-5, nesta ordem:
+Epic BREW-6, branch `epic/BREW-6`. Ordem:
 
-BREW-68 (1, task README) → BREW-69 (2, bug de mascaramento de exceções) → BREW-20 (5) → BREW-18 (3) → BREW-45 (5) [compromisso] → BREW-17 (3) → BREW-19 (3) → BREW-22 (2) [se der].
+BREW-23 (5, login e logout) → BREW-24 (5, provisionamento e `GET /me`) → BREW-26 (8, isolamento no banco) → BREW-25 (5, contexto de organização e permissões) [compromisso, 23 pontos] → BREW-27 (3, criar organização) → BREW-28 (5, consultar e editar com lock otimista) [se der, +8].
 
-Jobs de CI de front: cada história de front (17, 18, 19) adiciona o seu job ao pipeline da BREW-20. Detalhes e decisões em `docs/sprints/sprint-01.md`.
+Capacidade de cerca de 25h. A BREW-24 é a primeira história de negócio e carrega as decisões pendentes da fundação (ver memória do projeto). Detalhes, riscos e decisões em `docs/sprints/sprint-02.md`.
 
 ## Como trabalhar neste projeto
 
