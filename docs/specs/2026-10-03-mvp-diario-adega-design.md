@@ -389,7 +389,7 @@ Um documento curto de modelo de ameaças listará os ativos (receitas, dados pes
 
 ## 11. Decisões a registrar (ADRs)
 
-Cada decisão abaixo será registrada em um ADR próprio:
+Cada decisão abaixo será registrada em um ADR próprio, com o número do item. Decisões que surgirem depois entram no fim da lista. O índice, com o status de cada ADR, fica em `docs/adr/README.md`.
 
 1. Monolito modular com Spring Modulith e extração planejada de serviços.
 2. jOOQ com abordagem *schema-first* em vez de JPA.
@@ -407,6 +407,7 @@ Cada decisão abaixo será registrada em um ADR próprio:
 14. Log4j2 por trás da fachada SLF4J, com política de log de SQL por ambiente.
 15. Exceções à regra de paginação: vínculos no `GET /me` (coleção pequena por natureza) e comparação de lotes (resposta limitada por agregação em vez de paginação).
 16. Direção única de dependência entre módulos, com chamadas síncronas na mesma transação e inversão de dependência para a ocupação dos tanques.
+17. Cliente HTTP tipado pelo contrato da API, com toda falha entregue às telas como um único tipo de erro (decisão surgida na BREW-17).
 
 ---
 

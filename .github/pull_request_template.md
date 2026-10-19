@@ -65,5 +65,5 @@
 
 ### Arquitetura e bugs
 
-- [ ] ADR em `docs/adr/` quando há decisão de arquitetura nova ou alterada
+- [ ] ADR em `docs/adr/` quando há decisão de arquitetura nova ou alterada, com o índice (`docs/adr/README.md`) atualizado
 - [ ] Bug com teste que o reproduz antes da correção

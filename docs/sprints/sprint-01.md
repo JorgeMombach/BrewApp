@@ -104,6 +104,9 @@ Concluída a epic, ela é mergeada na `main` (primeira entrega na `main`), com o
 | 19/10 | Número digitado aceita vírgula ou ponto como separador decimal em qualquer idioma, sem separador de milhar: o `Intl` do `es` usa vírgula, mas no México se usa ponto. Em volume e massa, `1.000` vira 1; a primeira tela com esses campos (BREW-7) precisa tratar isso. |
 | 19/10 | Idioma em uso: escolha manual guardada no navegador, depois as preferências do navegador e, por fim, `pt-BR`. A preferência `idioma` do `GET /me` entra na frente na BREW-6, quando o seletor também passa a gravá-la. |
 | 19/10 | Garantias das traduções: chave inexistente quebra a compilação, o ESLint barra texto fixo no JSX e nos atributos lidos pelo usuário, o job `traducoes` da CI compara os três idiomas, e um teste do backend falha se algum código de erro ficar sem tradução. As traduções entraram no filtro do job do backend. |
+| 19/10 | ADRs da fundação (BREW-22): template e índice em `docs/adr/`, ADR 0001 (monolito modular) e ADR 0003 (hexagonal por módulo). O ADR 0017, que pegou o próximo número livre, entrou como item 17 na lista da spec (seção 11): decisão nova vai para o fim da lista. Os ADRs previstos ficam no índice com a epic onde devem aparecer. |
+| 19/10 | A regra do ArchUnit para a direção entre camadas (aplicação sem depender de adaptador, domínio sem depender de aplicação) entra na primeira história de negócio: sem módulo de negócio, a regra não teria classes para analisar e falharia. Até lá, só o domínio em Java puro e o jOOQ restrito à persistência são verificados (ADR 0003). |
+| 19/10 | Definition of Done e template de pull request: o critério de decisões de arquitetura passa a pedir também a atualização do índice de ADRs (`docs/adr/README.md`), inclusive o status de um ADR previsto que é escrito ou de um ADR substituído. |
 
 ## Resultado (preencher na retro)
 

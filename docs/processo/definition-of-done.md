@@ -72,7 +72,7 @@ Valem para toda entrega.
 
 ### Decisões de arquitetura
 
-- Quando a história introduz ou altera uma decisão de arquitetura, um ADR é escrito em `docs/adr/` na mesma entrega.
+- Quando a história introduz ou altera uma decisão de arquitetura, um ADR é escrito em `docs/adr/` na mesma entrega, e o índice (`docs/adr/README.md`) é atualizado com ele.
 
 ### Correção de bug
 
