@@ -22,7 +22,7 @@
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <archunit.version>1.5.1</archunit.version>
         <springdoc.version>3.1.1</springdoc.version>
-        <gmavenplus-plugin.version>4.2.0</gmavenplus-plugin.version>
+        <gmavenplus-plugin.version>5.1.0</gmavenplus-plugin.version>
         <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>
         <palantir-java-format.version>2.102.0</palantir-java-format.version>
         <!-- Ref do Git usada como base pelo Spotless; a CI troca pela branch de destino da pull request -->
