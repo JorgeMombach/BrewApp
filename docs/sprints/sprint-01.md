@@ -107,6 +107,7 @@ Concluída a epic, ela é mergeada na `main` (primeira entrega na `main`), com o
 | 19/10 | ADRs da fundação (BREW-22): template e índice em `docs/adr/`, ADR 0001 (monolito modular) e ADR 0003 (hexagonal por módulo). O ADR 0017, que pegou o próximo número livre, entrou como item 17 na lista da spec (seção 11): decisão nova vai para o fim da lista. Os ADRs previstos ficam no índice com a epic onde devem aparecer. |
 | 19/10 | A regra do ArchUnit para a direção entre camadas (aplicação sem depender de adaptador, domínio sem depender de aplicação) entra na primeira história de negócio: sem módulo de negócio, a regra não teria classes para analisar e falharia. Até lá, só o domínio em Java puro e o jOOQ restrito à persistência são verificados (ADR 0003). |
 | 19/10 | Definition of Done e template de pull request: o critério de decisões de arquitetura passa a pedir também a atualização do índice de ADRs (`docs/adr/README.md`), inclusive o status de um ADR previsto que é escrito ou de um ADR substituído. |
+| 19/10 | Review final: 14 de 14 itens atendem aos critérios de aceite; `mvnw verify` com 216 testes e front (lint, typecheck, 164 testes, build) passando; CI verde em todos os merges na epic desde a BREW-20. Achados: as 8 pull requests da ampliação (#7 a #14) não usaram o template, então a checagem de regressão e o checklist da DoD não ficaram registrados nelas (tratado na retro, sem editar as PRs depois do merge e sem criar task de checagem automática por enquanto); BREW-22 movida de In Progress para Production. Pontos de atenção para as próximas epics anotados na memória do projeto. |
 
 ## Resultado (preencher na retro)
 
@@ -118,23 +119,28 @@ Concluída a epic, ela é mergeada na `main` (primeira entrega na `main`), com o
 | BREW-21 | 1 | Sim (07/10) | 0,5h | |
 | BREW-15 | 5 | Sim (07/10) | 1h | |
 | BREW-16 | 3 | Sim (07/10) | 1h | Bug BREW-69 encontrado na review |
-| BREW-68 | 1 | | | Incluída em 10/10 |
-| BREW-69 | 2 | | | Incluído em 10/10 |
-| BREW-20 | 5 | | | Incluída em 10/10 |
-| BREW-18 | 3 | | | Incluída em 10/10 |
-| BREW-45 | 5 | | | Incluída em 10/10 |
-| BREW-17 | 3 | | | Incluída em 10/10 |
-| BREW-19 | 3 | | | Incluída em 10/10 |
-| BREW-22 | 2 | | | Incluída em 10/10 |
+| BREW-68 | 1 | Sim (12/10) | 1,5h | Incluída em 10/10. Só 0,5h foi o README: 1h é da review e ampliação de 10/10 e da skill de cerimônias, lançada nela |
+| BREW-69 | 2 | Sim (12/10) | 1h | Incluído em 10/10 |
+| BREW-20 | 5 | Sim (12/10) | 2h | Incluída em 10/10. A partir dela, CI verde em todos os merges na epic |
+| BREW-18 | 3 | Sim (13/10) | 2h | Incluída em 10/10 |
+| BREW-45 | 5 | Sim (13/10) | 2h | Incluída em 10/10. Gerou a BREW-70 (refratômetro), ainda sem estimativa |
+| BREW-17 | 3 | Sim (16/10) | 3h | Incluída em 10/10. Uma rodada de CI vermelha na PR antes do merge |
+| BREW-19 | 3 | Sim (19/10) | 2h | Incluída em 10/10 |
+| BREW-22 | 2 | Sim (19/10) | 0,5h | Incluída em 10/10. Ficou In Progress no Jira depois do merge; movida na review |
 
 **Parcial em 10/10 (backlog original):** 17 pontos em 11,5h, cerca de 0,7h por ponto. Infraestrutura com IA pareando saiu barata; o custo ficou em decisões e documentação. Pontos e horas ainda não andam juntos (a BREW-15, de 5 pontos, levou 1h; a BREW-12, de 2 pontos, levou 5h). Histórias de negócio devem custar mais, com o teste manual de funcionalidades entrando nas horas.
 
-- **Pontos concluídos (velocidade do sprint):**
-- **Horas totais:**
-- **Horas por ponto (referência, não meta):**
+- **Pontos concluídos (velocidade do sprint):** 41 de 41 (14 de 14 itens); compromisso original de 9 pontos e compromisso ampliado de 33
+- **Horas totais:** 25,5h (23,5h no Jira + 2h da BREW-12 sem registro), contra cerca de 16h de capacidade estimada. Sem a 1h de cerimônias lançada na BREW-68, 24,5h de entrega
+- **Horas por ponto (referência, não meta):** 0,6h (24,5h de entrega / 41 pontos). Backlog original: 0,68h (11,5h em 17 pontos); ampliação: 0,54h (13h em 24 pontos)
+- **Comparação com as sprints anteriores:** primeira sprint, sem base de comparação. A velocidade de referência para a Brew-02 é 41 pontos, com ressalvas (ver padrões)
+- **Padrões nos números:**
+  - Front custou mais por ponto: BREW-17 e BREW-19 somaram 5h em 6 pontos (0,83h/ponto), contra 6h em 13 pontos (0,46h/ponto) para BREW-20, BREW-18 e BREW-45.
+  - Pontos e horas continuam descolados nos dois sentidos: BREW-15 (5 pontos, 1h) e BREW-17 (3 pontos, 3h).
+  - As horas passaram 60% da capacidade estimada. A velocidade de 41 pontos veio de infraestrutura pareada com IA, sem teste manual de funcionalidade; histórias de negócio devem render menos pontos por hora.
 
 ### Retro
 
-- **O que funcionou:**
-- **O que atrapalhou:**
-- **O que muda no próximo sprint:**
+- **O que funcionou:** o volume de atividades foi condizente com duas semanas, e o ritmo da sprint funcionou como estava.
+- **O que atrapalhou:** nada que o Jorge tenha sentido como obstáculo. Da review: as 8 pull requests da ampliação saíram sem o template, então a checagem de regressão e o checklist da DoD ficaram só nas sessões de trabalho, sem registro nas PRs.
+- **O que muda no próximo sprint:** manter o mesmo formato. Para o planning: as 25,5h efetivas, e não as 16h estimadas, são a capacidade real de referência; e a descrição das pull requests volta a seguir o template.
