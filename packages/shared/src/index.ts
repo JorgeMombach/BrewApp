@@ -17,3 +17,17 @@ export {
   unidadeCanonica,
 } from './unidades/catalogo';
 export type { Grandeza, Unidade } from './unidades/catalogo';
+
+// Internacionalização (spec, seção 8): traduções embutidas, idiomas e formatação de números e datas com Intl
+export { IDIOMAS, IDIOMA_PADRAO, ehIdioma, idiomaPreferido } from './i18n/idiomas';
+export type { Idioma } from './i18n/idiomas';
+export {
+  TRADUCOES,
+  chaveDaGrandeza,
+  chaveDaUnidade,
+  chaveDaValidacao,
+  chaveDoErro,
+  ehChaveDeTraducao,
+} from './i18n/traducoes';
+export type { ChaveDeTraducao, Traducoes } from './i18n/traducoes';
+export { formatarData, formatarDataHora, formatarNumero, lerNumeroDigitado } from './i18n/formatacao';

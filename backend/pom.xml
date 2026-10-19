@@ -156,6 +156,12 @@
                 <directory>../packages/shared/casos-de-teste</directory>
                 <targetPath>casos-de-teste</targetPath>
             </testResource>
+            <!-- Traduções dos clientes (spec, seção 8): todo código de erro do backend precisa ter mensagem,
+                 conferido pelo TraducoesDosCodigosDeErroTest, lidas pelo classpath em /i18n -->
+            <testResource>
+                <directory>../packages/shared/i18n</directory>
+                <targetPath>i18n</targetPath>
+            </testResource>
         </testResources>
         <plugins>
             <!-- Desde o Java 23 o processamento de anotações não é mais implícito: o processador do log4j-core

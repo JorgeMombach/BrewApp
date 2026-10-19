@@ -10,6 +10,7 @@
     "gerar:tipos": "openapi-typescript openapi/openapi.json --output src/api/esquema.gerado.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "verificar:traducoes": "vitest run src/i18n/paridadeDasTraducoes.test.ts",
     "lint": "eslint . && prettier --check . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore",
     "formatar": "prettier --write . --ignore-path ../../.gitignore --ignore-path ../../.prettierignore"
   },

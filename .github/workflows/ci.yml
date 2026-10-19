@@ -30,6 +30,7 @@ jobs:
       backend: ${{ steps.filtro.outputs.backend }}
       contrato: ${{ steps.filtro.outputs.contrato }}
       web: ${{ steps.filtro.outputs.web }}
+      traducoes: ${{ steps.filtro.outputs.traducoes }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -43,9 +44,16 @@ jobs:
             backend:
               - 'backend/**'
               - 'infra/postgres/**'
-              # Os testes Java leem os casos compartilhados e regravam o contrato exportado
+              # Os testes Java leem os casos compartilhados e as traduções, e regravam o contrato exportado
               - 'packages/shared/casos-de-teste/**'
+              - 'packages/shared/i18n/**'
               - 'packages/shared/openapi/**'
+              - '.github/workflows/ci.yml'
+            traducoes:
+              - 'packages/shared/i18n/**'
+              - 'packages/shared/src/i18n/**'
+              - 'packages/shared/package.json'
+              - 'pnpm-lock.yaml'
               - '.github/workflows/ci.yml'
             contrato:
               - 'packages/shared/**'
@@ -198,6 +206,32 @@ jobs:
       # Conversões em TypeScript contra os mesmos casos dos testes Java (spec 4.5)
       - run: pnpm test
 
+  # Spec, seção 8: chave faltando, a mais, vazia ou com variáveis diferentes em algum idioma quebra a CI
+  traducoes:
+    name: Traduções completas em pt-BR, es e en
+    needs: mudancas
+    if: needs.mudancas.outputs.traducoes == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/shared
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Versão do pnpm vem do campo packageManager do package.json da raiz
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # O compilador já barra chave faltando no es e no en; aqui entram também as chaves a mais, os textos vazios e
+      # as variáveis. Que todo código de erro do backend tem tradução fica com o TraducoesDosCodigosDeErroTest
+      - name: Conferir as traduções contra o pt-BR
+        run: pnpm verificar:traducoes
+
   # A casca Tauri (apps/web/src-tauri) não compila aqui: o build do Rust leva minutos e é conferido localmente
   web:
     name: App web e desktop (lint, tipos, testes e build)
@@ -294,7 +328,8 @@ jobs:
 
   ci-concluida:
     name: CI concluída
-    needs: [mudancas, backend, formatacao-backend, jooq-divergencia, contrato, web, segredos, vulnerabilidades]
+    needs:
+      [mudancas, backend, formatacao-backend, jooq-divergencia, contrato, traducoes, web, segredos, vulnerabilidades]
     if: always()
     runs-on: ubuntu-24.04
     steps:
