@@ -82,8 +82,9 @@ Divergência entre código e docs: parar e perguntar. Mudança de decisão: atua
 | Diário de adega | BREW-9 |
 | Mobile e offline | BREW-10 |
 | Comparação de lotes | BREW-11 |
+| Identidade visual e experiência de uso | BREW-71 |
 
-Itens: BREW-12 a BREW-70 (57 histórias, 1 task, 1 bug; 233 pontos estimados depois da reestimativa da BREW-24 de 3 para 5; BREW-67 e BREW-70 ainda sem estimativa). Epic BREW-5 concluída e entregue na release 0.1.0 (19/10/2026). Criar ou alterar issues somente com aprovação explícita do usuário.
+Itens: BREW-12 a BREW-75, exceto a epic BREW-71 (61 histórias, 1 task, 1 bug; 233 pontos estimados depois da reestimativa da BREW-24 de 3 para 5; BREW-67, BREW-70 e BREW-72 a 75 ainda sem estimativa). A epic BREW-71 (criada em 22/10/2026, no backlog) espera o material da designer e deve ser lembrada no planning antes das primeiras telas de cadastro. Epic BREW-5 concluída e entregue na release 0.1.0 (19/10/2026). Criar ou alterar issues somente com aprovação explícita do usuário.
 
 ## Git
 
