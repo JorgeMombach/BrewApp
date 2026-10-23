@@ -16,7 +16,11 @@
   },
   "dependencies": {
     "@brewapp/shared": "workspace:*",
+    "@tauri-apps/api": "2.12.1",
+    "@tauri-apps/plugin-opener": "2.7.0",
     "i18next": "26.5.2",
+    "jwt-decode": "4.0.0",
+    "oidc-client-ts": "3.5.0",
     "openapi-fetch": "0.17.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",

@@ -1,4 +1,5 @@
 import type { RouteObject } from 'react-router';
+import { PaginaDeRetornoDoLogin } from './autenticacao/PaginaDeRetornoDoLogin';
 import { LayoutBase } from './layout/LayoutBase';
 import { PaginaInicial } from './paginas/PaginaInicial';
 import { PaginaNaoEncontrada } from './paginas/PaginaNaoEncontrada';
@@ -13,6 +14,8 @@ export const rotas: RouteObject[] = [
     element: <LayoutBase />,
     children: [
       { index: true, element: <PaginaInicial /> },
+      // Redirect cadastrado no client brewapp-web do Keycloak (CAMINHO_DO_RETORNO_DO_LOGIN)
+      { path: 'auth/callback', element: <PaginaDeRetornoDoLogin /> },
       { path: '*', element: <PaginaNaoEncontrada /> },
     ],
   },

@@ -317,6 +317,8 @@ O login é delegado a um **provedor de identidade (Keycloak)** via OpenID Connec
 
 Como o backend depende apenas do padrão OpenID Connect, trocar o Keycloak por Cognito ou outro provedor é uma mudança de configuração, não de código.
 
+Na web, o login acontece por redirect ao provedor. No desktop, ele abre no navegador do sistema, e o retorno chega ao app por um endereço local da própria máquina. A renovação da sessão usa refresh tokens rotativos, que valem uma única vez. Os detalhes estão no ADR 0010.
+
 ### 9.2 Autorização
 
 - **Negação por padrão:** toda rota exige autenticação. A lista de rotas públicas é explícita e mínima (verificação de saúde e, apenas em desenvolvimento, a documentação da API).

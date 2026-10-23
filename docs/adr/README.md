@@ -23,7 +23,7 @@ Para escrever um novo, use o [template](template.md).
 | 0007 | Estratégias de exclusão por tipo de dado | previsto | Primeiro cadastro com inativação lógica: BREW-6 Identidade e organização ou BREW-7 Recipientes |
 | 0008 | Offline restrito ao registro de eventos, com sincronização própria | previsto | BREW-10 Mobile e offline |
 | 0009 | Regra de aceitação de eventos atrasados pelo momento da medição | previsto | BREW-9 Diário de adega |
-| 0010 | Autenticação delegada a provedor OpenID Connect (Keycloak), com troca revisável | previsto | BREW-6 Identidade e organização |
+| 0010 | [Autenticação delegada a provedor OpenID Connect (Keycloak), com troca revisável](0010-autenticacao-delegada-a-provedor-oidc.md) | proposto | BREW-23 |
 | 0011 | Isolamento entre organizações em três camadas, incluindo Row Level Security | previsto | BREW-6 Identidade e organização |
 | 0012 | [Internacionalização em arquivos versionados, com migração planejada para o banco](0012-internacionalizacao-em-arquivos-versionados.md) | aceito | BREW-19 |
 | 0013 | [Contrato da API gerado a partir do código](0013-contrato-da-api-gerado-a-partir-do-codigo.md) | aceito | BREW-18 |

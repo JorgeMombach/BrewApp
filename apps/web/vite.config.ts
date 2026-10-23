@@ -3,6 +3,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
+  // Um único .env, o da raiz do monorepo: o Vite só expõe ao app as variáveis com prefixo VITE_
+  envDir: '../..',
   // Mantém visíveis os logs do Rust no terminal do "tauri dev"
   clearScreen: false,
   server: {

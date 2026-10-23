@@ -1,7 +1,13 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissões básicas do núcleo do Tauri para a janela principal; o app web ainda não chama nada nativo",
+  "description": "Núcleo do Tauri e abertura do login no navegador do sistema, restrita ao Keycloak local; no primeiro deploy, entra o endereço real (como na CSP do tauri.conf.json)",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "http://localhost:8180/*" }]
+    }
+  ]
 }

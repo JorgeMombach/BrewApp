@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet } from 'react-router';
+import { BotaoDeSessao } from '../autenticacao/BotaoDeSessao';
 import { SeletorDeIdioma } from '../i18n/SeletorDeIdioma';
 
-/** Moldura comum a todas as páginas: cabeçalho com a navegação e o idioma, e a página da rota atual. */
+/** Moldura comum a todas as páginas: cabeçalho com a navegação, a sessão e o idioma, e a página da rota atual. */
 export function LayoutBase() {
   const { t, i18n } = useTranslation();
 
@@ -20,7 +21,10 @@ export function LayoutBase() {
             {t('app.nome')}
           </Link>
         </nav>
-        <SeletorDeIdioma />
+        <div className="acoes-do-cabecalho">
+          <BotaoDeSessao />
+          <SeletorDeIdioma />
+        </div>
       </header>
       <main className="conteudo">
         <Outlet />

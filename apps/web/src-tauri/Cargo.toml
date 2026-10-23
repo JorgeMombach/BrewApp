@@ -15,4 +15,9 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.7.3", features = [] }
 
 [dependencies]
+# Cofre do sistema operacional (Credential Manager, Keychain, Secret Service) para o refresh token (spec 9.5)
+keyring = "4.2.0"
+serde = { version = "1.0.229", features = ["derive"] }
 tauri = { version = "2.12.4", features = [] }
+# Abre o login do Keycloak no navegador do sistema (RFC 8252)
+tauri-plugin-opener = "2.7.0"
