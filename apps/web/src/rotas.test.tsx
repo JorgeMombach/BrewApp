@@ -1,12 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { createMemoryRouter } from 'react-router';
-import { RouterProvider } from 'react-router/dom';
+import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { rotas } from './rotas';
+import { renderizarRotas } from './testes/renderizarRotas';
 
 function renderizarNaRota(caminho: string) {
-  const roteador = createMemoryRouter(rotas, { initialEntries: [caminho] });
-  render(<RouterProvider router={roteador} />);
+  renderizarRotas(caminho);
 }
 
 describe('rotas', () => {

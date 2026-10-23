@@ -1,13 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { createMemoryRouter } from 'react-router';
-import { RouterProvider } from 'react-router/dom';
+import { fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { rotas } from '../rotas';
+import { renderizarRotas } from '../testes/renderizarRotas';
 import { idiomaInicial } from './idiomaDoUsuario';
 
 function renderizarPaginaInicial() {
-  const roteador = createMemoryRouter(rotas, { initialEntries: ['/'] });
-  render(<RouterProvider router={roteador} />);
+  renderizarRotas('/');
 }
 
 describe('seletor de idioma', () => {

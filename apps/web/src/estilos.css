@@ -18,6 +18,13 @@ body {
   border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 }
 
+.acoes-do-cabecalho,
+.sessao {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .marca {
   font-weight: 600;
   color: inherit;
